@@ -33,7 +33,7 @@ def prihlasit():
         chybne_prihl_label.pack()
         chybne_prihl_okno.mainloop()
     else:                                           ## dobře zadané údaje
-        """hl_okno.quit()"""                        ## proč nefunguje?!
+        hl_okno.quit()                       ## proč nefunguje?!
         prihl_okno = tk.Tk()
         kredit_label = tk.Label(prihl_okno, text="Váš kredit je: "+kredit+"Kč")   ##vypisuje kredit
         kredit_label.grid(columnspan=3)
@@ -50,7 +50,7 @@ def prihlasit():
         cislo_entry = tk.Entry(prihl_okno)
         cislo_entry.grid(row=2, column=2)
 ###########################NEFUNGUJE############################################
-        doplnit_button = tk.Button(prihl_okno, text="Doplnit", command=doplnit(zkratka_entry, cislo_entry, jmeno_entry, kontakty))                  ## tlacitka pod vstupy
+        doplnit_button = tk.Button(prihl_okno, text="Doplnit", command=lambda: doplnit(zkratka_entry, cislo_entry, jmeno_entry, kontakty))                  ## tlacitka pod vstupy
         doplnit_button.grid(row=3)
 ################################################################################
         callback_button = tk.Button(prihl_okno, text="Objednat callback")
@@ -65,37 +65,37 @@ def doplnit(zkratka_entry, cislo_entry, jmeno_entry, kontakty):  ## doplní osta
     if len(zkratka) > 0:            ## pokud je vyplněna zkratka doplní jmeno a cislo
         for i in kontakty:
             if str(i[0]) == zkratka:
-                jmeno_entry.delete(0, END)
-                jmeno_entry.insert(INSERT, i[1])
-                cislo_entry.delete(0, END)
-                cislo_entry.insert(INSERT, i[2])
+                jmeno_entry.delete(0, tk.END)
+                jmeno_entry.insert(tk.INSERT, i[1])
+                cislo_entry.delete(0, tk.END)
+                cislo_entry.insert(tk.INSERT, i[2])
             else:
                 print "CHYBA"
     elif len(jmeno) > 0:            ##doplnene jmeno .. doplni zkratku a cislo
         for i in kontakty:
             if str(i[1]) == jmeno:
-                zkratka_entry.delete(0, END)
-                zkratka_entry.insert(INSERT, i[0])
-                cislo_entry.delete(0, END)
-                cislo_entry.insert(INSERT, i[2])
+                zkratka_entry.delete(0, tk.END)
+                zkratka_entry.insert(tk.INSERT, i[0])
+                cislo_entry.delete(0, tk.END)
+                cislo_entry.insert(tk.INSERT, i[2])
             else:
                 print "CHYBA"
     elif len(cislo) > 0:            ## napodobe ale je vyplnene cislo
         for i in kontakty:
             if str(i[2]) == cislo:
-                zkratka_entry.delete(0, END)
-                zkratka_entry.insert(INSERT, i[0])
-                jmeno_entry.delete(0, END)
-                jmeno_entry.insert(INSERT, i[1])
+                zkratka_entry.delete(0, tk.END)
+                zkratka_entry.insert(tk.INSERT, i[0])
+                jmeno_entry.delete(0, tk.END)
+                jmeno_entry.insert(tk.INSERT, i[1])
             else:
                 print "CHYBA"
     elif len(jmeno) > 0:
          for i in kontakty:
             if str(i[3]) == jmeno:
-                zkratka_entry.delete(0, END)
-                zkratka_entry.insert(INSERT, i[0])
-                jmeno_entry.delete(0, END)
-                jmeno_entry.insert(INSERT, i[1])
+                zkratka_entry.delete(0, tk.END)
+                zkratka_entry.insert(tk.INSERT, i[0])
+                jmeno_entry.delete(0, tk.END)
+                jmeno_entry.insert(tk.INSERT, i[1])
             else:
                 print "CHYBA"
     else:
