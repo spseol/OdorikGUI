@@ -31,6 +31,7 @@ def prihlasit():
     else:                                           ## dobře zadané údaje
         kontakty_mezikrok = urllib.urlopen("https://www.odorik.cz/api/v1/speed_dials.json?"+udaje)   ##získání kontaktů
         kontakty_dalsi_mezikrok = kontakty_mezikrok.read()
+        global kontakty
         kontakty = json.loads(kontakty_dalsi_mezikrok, object_hook=vypsat)          ##kontakty jako 3-členné ntice v seznamu
         hl_okno.destroy()                       
         prihl_okno = tk.Tk()
@@ -63,15 +64,51 @@ def prihlasit():
         odebrat_button.grid(row=0, column=3, sticky=tk.E+tk.W+tk.N+tk.S)
         callback_button = tk.Button(frame_na_buttony, text="Objednat callback", command=lambda: callback(cislo_entry, jmeno_entry,))
         callback_button.grid(row=0, column=4, sticky=tk.E+tk.W+tk.N+tk.S)
+        global seznam_hodnot
+        seznam_hodnot = []
+        for i in range(1+len(kontakty)/10):
+            hodnota = "Strana"+str(i+1)+"/"+str(1+len(kontakty)/10)
+            seznam_hodnot.append(hodnota)
+        global hodnoty
         hodnoty = tk.StringVar()
-        hodnoty.set("Strana 1/"+str(len(kontakty)/10)) 
-        strankovac = tk.OptionMenu(prihl_okno, hodnoty, "Strana 1/"+str(len(kontakty)/10))
+        hodnoty.set(seznam_hodnot[0]) 
+        strankovac = tk.OptionMenu(prihl_okno, hodnoty, *seznam_hodnot, command=kontakty_funkce)     
         strankovac.grid(row=4, column=0, columnspan=3)
-            
+           
         if len(kontakty)==0:
             kontakt = tk.Label(prihl_okno, text=u"Nemáte žádný uložený kontakt")
             kontakt.grid(row=5, column=0, columnspan=3)
         else:
+            global kontakt1_zkratka
+            global kontakt1_jmeno
+            global kontakt1_cislo
+            global kontakt2_zkratka
+            global kontakt2_jmeno
+            global kontakt2_cislo
+            global kontakt3_zkratka
+            global kontakt3_jmeno
+            global kontakt3_cislo
+            global kontakt4_zkratka
+            global kontakt4_jmeno
+            global kontakt4_cislo
+            global kontakt5_zkratka
+            global kontakt5_jmeno
+            global kontakt5_cislo
+            global kontakt6_zkratka
+            global kontakt6_jmeno
+            global kontakt6_cislo
+            global kontakt7_zkratka
+            global kontakt7_jmeno
+            global kontakt7_cislo
+            global kontakt8_zkratka
+            global kontakt8_jmeno
+            global kontakt8_cislo
+            global kontakt9_zkratka
+            global kontakt9_jmeno
+            global kontakt9_cislo
+            global kontakt10_zkratka
+            global kontakt10_jmeno
+            global kontakt10_cislo
             kontakt1_zkratka = tk.Label(prihl_okno, text=kontakty[0][0])
             kontakt1_zkratka.grid(row=5, column=0)
             kontakt1_jmeno = tk.Label(prihl_okno, text=kontakty[0][1])
@@ -133,11 +170,83 @@ def prihlasit():
             kontakt10_cislo = tk.Label(prihl_okno, text=kontakty[9][2])
             kontakt10_cislo.grid(row=14, column=2)
             prihl_okno.mainloop()
+aktualni_hodnota = hodnoty.get()           
+
+
+def kontakty_funkce(aktualni_hodnota):
+    global seznam_hodnot
+    global kontakty
+    global hodnoty
+    global kontakt1_zkratka
+    global kontakt1_jmeno
+    global kontakt1_cislo
+    global kontakt2_zkratka
+    global kontakt2_jmeno
+    global kontakt2_cislo
+    global kontakt3_zkratka
+    global kontakt3_jmeno
+    global kontakt3_cislo
+    global kontakt4_zkratka
+    global kontakt4_jmeno
+    global kontakt4_cislo
+    global kontakt5_zkratka
+    global kontakt5_jmeno
+    global kontakt5_cislo
+    global kontakt6_zkratka
+    global kontakt6_jmeno
+    global kontakt6_cislo
+    global kontakt7_zkratka
+    global kontakt7_jmeno
+    global kontakt7_cislo
+    global kontakt8_zkratka
+    global kontakt8_jmeno
+    global kontakt8_cislo
+    global kontakt9_zkratka
+    global kontakt9_jmeno
+    global kontakt9_cislo
+    global kontakt10_zkratka
+    global kontakt10_jmeno
+    global kontakt10_cislo
+    strana = -1
+    for i in seznam_hodnot:
+        strana = strana+1
+        if i == hodnoty.get():
+            pozice = strana * 10
+            kontakt1_zkratka["text"] = kontakty[pozice][0]
+            kontakt1_jmeno["text"] = kontakty[pozice][1]
+            kontakt1_cislo["text"] = kontakty[pozice][2]
+            kontakt2_zkratka["text"] = kontakty[pozice+1][0]
+            kontakt2_jmeno["text"] = kontakty[pozice+1][1]
+            kontakt2_cislo["text"] = kontakty[pozice+1][2]
+            kontakt3_zkratka["text"] = kontakty[pozice+2][0]
+            kontakt3_jmeno["text"] = kontakty[pozice+2][1]
+            kontakt3_cislo["text"] = kontakty[pozice+2][2]
+            kontakt4_zkratka["text"] = kontakty[pozice+3][0]
+            kontakt4_jmeno["text"] = kontakty[pozice+3][1]
+            kontakt4_cislo["text"] = kontakty[pozice+3][2]
+            kontakt5_zkratka["text"] = kontakty[pozice+4][0]
+            kontakt5_jmeno["text"] = kontakty[pozice+4][1]
+            kontakt5_cislo["text"] = kontakty[pozice+4][2]
+            kontakt6_zkratka["text"] = kontakty[pozice+5][0]
+            kontakt6_jmeno["text"] = kontakty[pozice+5][1]
+            kontakt6_cislo["text"] = kontakty[pozice+5][2]
+            kontakt7_zkratka["text"] = kontakty[pozice+6][0]
+            kontakt7_jmeno["text"] = kontakty[pozice+6][1]
+            kontakt7_cislo["text"] = kontakty[pozice+6][2]
+            kontakt8_zkratka["text"] = kontakty[pozice+7][0]
+            kontakt8_jmeno["text"] = kontakty[pozice+7][1]
+            kontakt8_cislo["text"] = kontakty[pozice+7][2]
+            kontakt9_zkratka["text"] = kontakty[pozice+8][0]
+            kontakt9_jmeno["text"] = kontakty[pozice+8][1]
+            kontakt9_cislo["text"] = kontakty[pozice+8][2]
+            kontakt10_zkratka["text"] = kontakty[pozice+9][0]
+            kontakt10_jmeno["text"] = kontakty[pozice+9][1]
+            kontakt10_cislo["text"] = kontakty[pozice+9][2]
 
 
 
 def odebrat(kontakty):
-    return
+    pass
         
 
 
