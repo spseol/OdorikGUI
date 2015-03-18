@@ -8,6 +8,8 @@ import json
 import urllib
 import Tkinter as tk
 import tkMessageBox as tkm
+import httplib
+import datetime
 ##############################################################################
 ##############################################################################
 
@@ -15,6 +17,9 @@ import tkMessageBox as tkm
 def vypsat(kontakty):                   ##získá kontakty ve formátu json
      return kontakty["shortcut"], kontakty["name"], kontakty["number"]
 
+
+def datum_cislo_cena(posl_hovor):
+    return posl_hovor["date"], posl_hovor["destination_number"], posl_hovor["price"]
 
 
 def prihlasit():
@@ -31,13 +36,47 @@ def prihlasit():
     else:                                           ## dobře zadané údaje
         kontakty_mezikrok = urllib.urlopen("https://www.odorik.cz/api/v1/speed_dials.json?"+udaje)   ##získání kontaktů
         kontakty_dalsi_mezikrok = kontakty_mezikrok.read()
-        global kontakty
         kontakty = json.loads(kontakty_dalsi_mezikrok, object_hook=vypsat)          ##kontakty jako 3-členné ntice v seznamu
-        hl_okno.destroy()                       
+        dnes = datetime.datetime.now()
+        mesic = "%d" % dnes.month
+        mesic = int(mesic)
+        if mesic == 1:
+            prmesic = 12
+        else:
+            prmesic = mesic-1
+        if prmesic <10:
+            prmesic = "0"+str(prmesic)
+        dnes = str(dnes)
+        do = dnes[:10]+"T"+dnes[11:19]+"Z"
+        od = do[:5]+str(prmesic)+do[7:]
+        print od,do
+        posl_hovor_url = "https://www.odorik.cz/api/v1/calls.json?"+"user="+prihl_jmeno+"&password="+heslo+"&from="+od+"&to="+do+"&direction=out"
+        zjistit_posl_hovor = urllib.urlopen(posl_hovor_url)
+        posl_hovor_mezikrok = zjistit_posl_hovor.read()
+        posl_hovor_mezikrok2=json.loads(posl_hovor_mezikrok,object_hook=datum_cislo_cena)
+        posl_hovor = posl_hovor_mezikrok2[len(posl_hovor_mezikrok2)-1]
+        posl_hovor_cena = float(posl_hovor_mezikrok2[len(posl_hovor_mezikrok2)-1][2])+float(posl_hovor_mezikrok2[len(posl_hovor_mezikrok2)-2][2]) 
+        hl_okno.destroy()
         prihl_okno = tk.Tk()
 ############################################################################### horní informace
-        kredit_label = tk.Label(prihl_okno, text="Váš kredit je: "+kredit+"Kč")   ##vypisuje kredit
+        info_frame = tk.Frame(prihl_okno)        
+        kredit_label = tk.Label(info_frame, text="Váš kredit je: "+kredit+"Kč")   ##vypisuje kredit
         kredit_label.grid(columnspan=3)
+        posledni_hovor_label = tk.Label(info_frame, text="Poslední hovor:", width=60)
+        posledni_hovor_label.grid(row=1, columnspan=3)
+        posl_hov_datum = tk.Label(info_frame, text="Datum", width=20)
+        posl_hov_datum.grid(row=2)
+        posl_hov_cislo = tk.Label(info_frame, text="Číslo", width=20)
+        posl_hov_cislo.grid(row=2, column=1)
+        posl_hov_cena = tk.Label(info_frame, text="Cena", width=20)
+        posl_hov_cena.grid(row=2, column=2)
+        posl_hov_datum1 = tk.Label(info_frame, text=posl_hovor[0], width=20)
+        posl_hov_datum1.grid(row=3)
+        posl_hov_cislo1 = tk.Label(info_frame, text=posl_hovor[1][5:], width=20)
+        posl_hov_cislo1.grid(row=3, column=1)
+        posl_hov_cena1 = tk.Label(info_frame, text=str(posl_hovor_cena)+"Kč", width=20)
+        posl_hov_cena1.grid(row=3, column=2)
+        info_frame.grid(sticky=tk.E+tk.W+tk.N+tk.S, columnspan=3)
 ########################################################################### vstupy       
         zkratka_label = tk.Label(prihl_okno, text="Zkratka")                    ##záhlaví callbacku
         zkratka_label.grid(row=1)
@@ -54,13 +93,13 @@ def prihlasit():
 ########################################################################### tlačítka pod vstupy
         frame_na_buttony = tk.Frame(prihl_okno)
         frame_na_buttony.grid(row=3, sticky=tk.E+tk.W+tk.N+tk.S, columnspan=3) 
-        doplnit_button = tk.Button(frame_na_buttony, text="Doplnit", command=lambda: doplnit(zkratka_entry, cislo_entry, jmeno_entry, kontakty))                  ## tlacitka pod vstupy
+        doplnit_button = tk.Button(frame_na_buttony, text="Doplnit", command=lambda: doplnit(zkratka_entry, cislo_entry, jmeno_entry))                  ## tlacitka pod vstupy
         doplnit_button.grid(row=0, column=0, sticky=tk.E+tk.W+tk.N+tk.S)
         smazat_button = tk.Button(frame_na_buttony, text="Smazat", command=lambda: smazat(zkratka_entry, cislo_entry, jmeno_entry))
         smazat_button.grid(column=1, row=0, sticky=tk.E+tk.W+tk.N+tk.S)
         pridat_button = tk.Button(frame_na_buttony, text="přidat", command=lambda: pridat(zkratka_entry, cislo_entry, jmeno_entry))
         pridat_button.grid(row=0, column=2, sticky=tk.E+tk.W+tk.N+tk.S)
-        odebrat_button = tk.Button(frame_na_buttony, text="odebrat", command=lambda: odebrat(kontakty))
+        odebrat_button = tk.Button(frame_na_buttony, text="odebrat", command=lambda: odebrat(zkratka_entry))
         odebrat_button.grid(row=0, column=3, sticky=tk.E+tk.W+tk.N+tk.S)
         callback_button = tk.Button(frame_na_buttony, text="Objednat callback", command=lambda: callback(cislo_entry, jmeno_entry,))
         callback_button.grid(row=0, column=4, sticky=tk.E+tk.W+tk.N+tk.S)
@@ -170,12 +209,13 @@ def prihlasit():
             kontakt10_cislo = tk.Label(prihl_okno, text=kontakty[9][2])
             kontakt10_cislo.grid(row=14, column=2)
             prihl_okno.mainloop()
-aktualni_hodnota = hodnoty.get()           
+            global aktualni_hodnota
+            aktualni_hodnota = hodnoty.get()           
 
 
 def kontakty_funkce(aktualni_hodnota):
+    global aktualni_honota
     global seznam_hodnot
-    global kontakty
     global hodnoty
     global kontakt1_zkratka
     global kontakt1_jmeno
@@ -207,6 +247,9 @@ def kontakty_funkce(aktualni_hodnota):
     global kontakt10_zkratka
     global kontakt10_jmeno
     global kontakt10_cislo
+    kontakty_mezikrok = urllib.urlopen("https://www.odorik.cz/api/v1/speed_dials.json?"+udaje)   ##získání kontaktů
+    kontakty_dalsi_mezikrok = kontakty_mezikrok.read()
+    kontakty = json.loads(kontakty_dalsi_mezikrok, object_hook=vypsat) 
     strana = -1
     for i in seznam_hodnot:
         strana = strana+1
@@ -245,25 +288,39 @@ def kontakty_funkce(aktualni_hodnota):
 
 
 
-def odebrat(kontakty):
-    pass
+def odebrat(zkratka_entry):
+    global udaje
+    zkratka = zkratka_entry.get()
+    prihl=httplib.HTTPSConnection("www.odorik.cz")
+    prihl.request('DELETE', "/api/v1/speed_dials/"+zkratka+".json", udaje)
+    odp = prihl.getresponse()
+    odpoved = odp.read()
+    print odpoved
+    prihl.close()
+    
         
 
 
 
 def pridat(zkratka_entry, cislo_entry, jmeno_entry):
+    global udaje
     zkratka = zkratka_entry.get()
     cislo = cislo_entry.get()
     jmeno = jmeno_entry.get()
+    prihl=httplib.HTTPSConnection("www.odorik.cz")
     dalsi_udaje = urllib.urlencode({'shortcut': zkratka, 'name': jmeno, 'number': cislo})
     celkove_udaje = udaje+"&"+dalsi_udaje
-    pridani = urllib.urlopen("https://www.odorik.cz/api/v1/speed_dials.json"+celkove_udaje)
-    print pridani
-    print pridani.read()
-    print dalsi_udaje
+    prihl.request('POST', "/api/v1/speed_dials.json" , celkove_udaje)
+    odp = prihl.getresponse()
+    odpoved = odp.read()
+    print odpoved
+    prihl.close()
 
 
-def doplnit(zkratka_entry, cislo_entry, jmeno_entry, kontakty):  ## doplní ostatní údaje do entry v hlavičce
+def doplnit(zkratka_entry, cislo_entry, jmeno_entry):  ## doplní ostatní údaje do entry v hlavičce
+    kontakty_mezikrok = urllib.urlopen("https://www.odorik.cz/api/v1/speed_dials.json?"+udaje)   ##získání kontaktů
+    kontakty_dalsi_mezikrok = kontakty_mezikrok.read()
+    kontakty = json.loads(kontakty_dalsi_mezikrok, object_hook=vypsat)
     jmeno = jmeno_entry.get()
     cislo = cislo_entry.get()
     zkratka = zkratka_entry.get()
@@ -295,9 +352,7 @@ def doplnit(zkratka_entry, cislo_entry, jmeno_entry, kontakty):  ## doplní osta
                 zkratka_entry.insert(tk.INSERT, i[0])
                 jmeno_entry.delete(0, tk.END)
                 jmeno_entry.insert(tk.INSERT, i[1])
-    else:
-        print "CHYBAasad"
-
+        
 
 def smazat(zkratka_entry, jmeno_entry, cislo_entry):        ##po kliknutí na tlačítko smazat
     zkratka_entry.delete(0, tk.END)
@@ -405,7 +460,6 @@ def objednat_callback(moje_cislo_entry, cislo_entry, udaje):  ##objedná callbac
     vsechny_udaje = udaje+"&"+cisla
     objednat_callback = urllib.urlopen("https://www.odorik.cz/api/v1/callback", vsechny_udaje)
     odpoved =  objednat_callback.read()
-    print odpoved
     if odpoved == "callback_ordered":
         tkm.showinfo("Callback", u"Callback byl úspěšně objednán")
     elif odpoved == "error callback_failed":
