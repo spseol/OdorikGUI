@@ -42,15 +42,18 @@ def prihlasit():
         kontakty_mezikrok = urllib.urlopen("https://www.odorik.cz/api/v1/speed_dials.json?"+udaje)   ##získání kontaktů
         kontakty_dalsi_mezikrok = kontakty_mezikrok.read()
         kontakty = json.loads(kontakty_dalsi_mezikrok, object_hook=vypsat)          ##kontakty jako 3-členné ntice v seznamu
-        global zkratky_jmena        
+        global zkratky_jmena
         zkratky_jmena = []
         for i in kontakty:
             if len(str(i[0])) == 1:
-                zkratky_jmena.append(str(i[0])+"     "+str(i[1]))
+                zapsat = "%s    %s"%(i[0],i[1])
+                zkratky_jmena.append(zapsat)
             elif len(str(i[0])) == 2:
-                zkratky_jmena.append(str(i[0])+"    "+str(i[1]))
+                zapsat = "%s   %s"%(i[0],i[1])
+                zkratky_jmena.append(zapsat)
             else:
-                zkratky_jmena.append(str(i[0])+"   "+str(i[1]))
+                zapsat = "%s  %s"%(i[0],i[1])
+                zkratky_jmena.append(zapsat)
         dnes = datetime.datetime.now()
         mesic = "%d" % dnes.month
         mesic = int(mesic)
