@@ -111,7 +111,7 @@ def prihlasit():
         callback_button = tk.Button(callback_frame, text="Objednat callback", font="Arial_black 10 bold", activebackground="#99FF99", command=lambda: callback(cislo_label), bg="#409940", width =40)
         callback_button.grid(row=2, column=0, padx=40, pady=10)
         callback_frame.grid(row=2, columnspan=3, sticky=tk.E+tk.W+tk.N+tk.S, padx= 10, pady=10)
-########################################################################### tlačítka pod vstupy
+########################################################################### 
         pridat_button = tk.Button(prihl_okno, text="Přidat kontakt", font="Arial_black 8 bold", activebackground="#99FF99", bg="#409940", command=pridat_kontakt)
         pridat_button.grid(row=15, column=1, padx=20, pady=10)
         
@@ -655,15 +655,15 @@ def kontakty_funkce(aktualni_hodnota):
 
 
 
-def odebrat(zkratka_entry):
-    global udaje
-    zkratka = zkratka_entry.get()
-    prihl=httplib.HTTPSConnection("www.odorik.cz")
-    prihl.request('DELETE', "/api/v1/speed_dials/"+zkratka+".json", udaje)
-    odp = prihl.getresponse()
-    odpoved = odp.read()
-    print odpoved
-    prihl.close()
+#def odebrat(zkratka_entry):
+#    global udaje
+#    zkratka = zkratka_entry.get()
+#    prihl=httplib.HTTPSConnection("www.odorik.cz")
+#    prihl.request('DELETE', "/api/v1/speed_dials/"+zkratka+".json", udaje)
+#    odp = prihl.getresponse()
+#    odpoved = odp.read()
+#    print odpoved
+#    prihl.close()
     
         
 
@@ -701,51 +701,6 @@ def pridat(zkratka_entry, cislo_entry, jmeno_entry):
         odpoved = json.loads(odpoved_mezikrok, object_hook=uspech)
         tkm.showinfo(u"Přidáno", u"Kontakt byl úspěšně přidán")
         pridat_kontakt_okno.destroy()
-
-    
-       
-        
-            
-            
-
-    
-
-
-def doplnit(zkratka_entry, cislo_entry, jmeno_entry):  ## doplní ostatní údaje do entry v hlavičce
-    kontakty_mezikrok = urllib.urlopen("https://www.odorik.cz/api/v1/speed_dials.json?"+udaje)   ##získání kontaktů
-    kontakty_dalsi_mezikrok = kontakty_mezikrok.read()
-    kontakty = json.loads(kontakty_dalsi_mezikrok, object_hook=vypsat)
-    jmeno = jmeno_entry.get()
-    cislo = cislo_entry.get()
-    zkratka = zkratka_entry.get()
-    if len(zkratka) > 0:            ## pokud je vyplněna zkratka doplní jmeno a cislo
-        for i in kontakty:
-            if str(i[0]) == zkratka:
-                jmeno_entry.delete(0, tk.END)
-                jmeno_entry.insert(tk.INSERT, i[1])
-                cislo_entry.delete(0, tk.END)
-                cislo_entry.insert(tk.INSERT, i[2][-9:])
-    elif len(jmeno) > 0:            ##doplnene jmeno .. doplni zkratku a cislo
-        for i in kontakty:
-            if str(i[1]) == jmeno:
-                zkratka_entry.delete(0, tk.END)
-                zkratka_entry.insert(tk.INSERT, i[0])
-                cislo_entry.delete(0, tk.END)
-                cislo_entry.insert(tk.INSERT, i[2][-9:])
-    elif len(cislo) > 0:            ## napodobe ale je vyplnene cislo
-        for i in kontakty:
-            if str(i[2][-9:]) == cislo:
-                zkratka_entry.delete(0, tk.END)
-                zkratka_entry.insert(tk.INSERT, i[0])
-                jmeno_entry.delete(0, tk.END)
-                jmeno_entry.insert(tk.INSERT, i[1])
-
-        
-
-def smazat(zkratka_entry, jmeno_entry, cislo_entry):        ##po kliknutí na tlačítko smazat
-    zkratka_entry.delete(0, tk.END)
-    jmeno_entry.delete(0, tk.END)
-    cislo_entry.delete(0, tk.END)
 
 
 def callback(cislo_label):                 ##vyvolá okno po kliknutí na tlačítko callback
@@ -790,19 +745,6 @@ def callback(cislo_label):                 ##vyvolá okno po kliknutí na tlač�
     minuty_callback_button = tk.Button(callback_okno, activebackground="#99FF99", text="Objednat dle spoždění", font="Arial_black 8 bold", bg="#409940", command= lambda: callback_cas(moje_cislo_entry, cislo_label, udaje, minuty_callback_entry, callback_hlavni_okno), width=25)
     minuty_callback_button.grid(row=11, columnspan=2, padx=5, pady=10)
     callback_hlavni_okno.mainloop()
-
-
-def ulozit_moje_cislo(moje_cislo_entry):
-    cislo_soubor = open("cislo.txt", "w")
-    cislo_soubor.write(moje_cislo_entry.get())
-    cislo_soubor.close()
-    
-    
-def vyplnit_moje_cislo(moje_cislo_entry):
-    cislo_soubor = open("cislo.txt", "r")
-    cislo = cislo_soubor.readline()
-    moje_cislo_entry.delete(0, tk.END)
-    moje_cislo_entry.insert(tk.END, cislo)
 
 
 def callback_cas(moje_cislo_entry, cislo_label, udaje, minuty_callback_entry,callback_hlavni_okno):
