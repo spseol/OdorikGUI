@@ -42,6 +42,15 @@ def prihlasit():
         kontakty_mezikrok = urllib.urlopen("https://www.odorik.cz/api/v1/speed_dials.json?"+udaje)   ##získání kontaktů
         kontakty_dalsi_mezikrok = kontakty_mezikrok.read()
         kontakty = json.loads(kontakty_dalsi_mezikrok, object_hook=vypsat)          ##kontakty jako 3-členné ntice v seznamu
+        global zkratky_jmena        
+        zkratky_jmena = []
+        for i in kontakty:
+            if len(str(i[0])) == 1:
+                zkratky_jmena.append(str(i[0])+"     "+str(i[1]))
+            elif len(str(i[0])) == 2:
+                zkratky_jmena.append(str(i[0])+"    "+str(i[1]))
+            else:
+                zkratky_jmena.append(str(i[0])+"   "+str(i[1]))
         dnes = datetime.datetime.now()
         mesic = "%d" % dnes.month
         mesic = int(mesic)
@@ -88,32 +97,24 @@ def prihlasit():
         posl_hov_cena1.grid(row=3, column=2)
         posledni_hovor_frame.grid(pady=20)
         info_frame.grid( columnspan=3)
-########################################################################### vstupy       
-        zkratka_label = tk.Label(prihl_okno, text="Zkratka", bg="#32CD32", font="Arial_black 10 bold")                    ##záhlaví callbacku
-        zkratka_label.grid(row=1, column=0)
-        jmeno_label = tk.Label(prihl_okno, text=u"Jméno", bg="#32CD32", font="Arial_black 10 bold")
-        jmeno_label.grid(row=1, column=1)
-        cislo_label = tk.Label(prihl_okno, text=u"Číslo", bg="#32CD32", font="Arial_black 10 bold")
-        cislo_label.grid(row=1, column=2)
-        zkratka_entry = tk.Entry(prihl_okno, bg="#99FF99", relief="groove", justify="center")                                    
-        zkratka_entry.grid(row=2)
-        jmeno_entry = tk.Entry(prihl_okno, bg="#99FF99", relief="groove", justify="center")
-        jmeno_entry.grid(row=2, column=1)
-        cislo_entry = tk.Entry(prihl_okno, bg="#99FF99", relief="groove", justify="center")
-        cislo_entry.grid(row=2, column=2)
+###########################################################################      
+        callback_frame = tk.LabelFrame(prihl_okno, text="Callback", bg="#32CD32", font="Arial_black 8 bold")
+        global zkratka_jmeno_promenna
+        zkratka_jmeno_promenna = tk.StringVar(callback_frame)
+        zkratka_jmeno_promenna.set(zkratky_jmena[0])
+        zkratka_optmenu = tk.OptionMenu(callback_frame, zkratka_jmeno_promenna, *zkratky_jmena, command= dopln_cislo)
+        zkratka_optmenu.config(bg="#409940", activebackground="#99FF99", font="Arial_black 10 bold", highlightbackground="#99FF99")                                    
+        zkratka_optmenu.grid(row=0, sticky=tk.E+tk.W+tk.N+tk.S, padx= 10, pady=10)
+        global cislo_label
+        cislo_label = tk.Label(callback_frame, bg="#99FF99", relief="groove", text=kontakty[0][2], width=60, font="Arial_black 10 bold")
+        cislo_label.grid(row=1, sticky=tk.E+tk.W+tk.N+tk.S, padx= 10, pady=10)
+        callback_button = tk.Button(callback_frame, text="Objednat callback", font="Arial_black 10 bold", activebackground="#99FF99", command=lambda: callback(cislo_label), bg="#409940", width =40)
+        callback_button.grid(row=2, column=0, padx=40, pady=10)
+        callback_frame.grid(row=2, columnspan=3, sticky=tk.E+tk.W+tk.N+tk.S, padx= 10, pady=10)
 ########################################################################### tlačítka pod vstupy
-        frame_na_buttony = tk.Frame(prihl_okno, bg="#32CD32")
-        frame_na_buttony.grid(row=3, padx=10, columnspan=3) 
-        doplnit_button = tk.Button(frame_na_buttony, text="Doplnit pole", font="Arial_black 8 bold", activebackground="#99FF99", command=lambda: doplnit(zkratka_entry, cislo_entry, jmeno_entry), bg="#409940")                  ## tlacitka pod vstupy
-        doplnit_button.grid(row=0, column=0, pady=10)
-        smazat_button = tk.Button(frame_na_buttony, text="Smazat pole", font="Arial_black 8 bold", activebackground="#99FF99", command=lambda: smazat(zkratka_entry, cislo_entry, jmeno_entry), bg="#409940")
-        smazat_button.grid(column=1, row=0, pady=10, padx= 20)
-        pridat_button = tk.Button(frame_na_buttony, text="Přidat kontakt", font="Arial_black 8 bold", activebackground="#99FF99", command=lambda: pridat(zkratka_entry, cislo_entry, jmeno_entry), bg="#409940")
-        pridat_button.grid(row=0, column=2, padx=20, sticky=tk.E)
-        odebrat_button = tk.Button(frame_na_buttony, text="Odebrat kontakt", font="Arial_black 8 bold", activebackground="#99FF99", command=lambda: odebrat(zkratka_entry), bg="#409940")
-        odebrat_button.grid(row=0, column=3, sticky=tk.E)
-        callback_button = tk.Button(frame_na_buttony, text="Objednat callback", font="Arial_black 8 bold", activebackground="#99FF99", command=lambda: callback(cislo_entry, jmeno_entry,), bg="#409940")
-        callback_button.grid(row=1, column=0, columnspan=4, padx=40, sticky=tk.E+tk.W+tk.N+tk.S)
+        pridat_button = tk.Button(prihl_okno, text="Přidat kontakt", font="Arial_black 8 bold", activebackground="#99FF99", bg="#409940", command=pridat_kontakt)
+        pridat_button.grid(row=15, column=1, padx=20, pady=10)
+        
         global seznam_hodnot
         seznam_hodnot = []
         for i in range(1+len(kontakty)/10):
@@ -123,13 +124,8 @@ def prihlasit():
         hodnoty = tk.StringVar()
         hodnoty.set(seznam_hodnot[0]) 
         strankovac = tk.OptionMenu(prihl_okno, hodnoty, *seznam_hodnot, command=kontakty_funkce)
-        strankovac["background"] = "#409940"
-        strankovac["activebackground"] = "#99FF99"
-        strankovac["font"] = "Arial_black 8 bold"
-        strankovac["highlightbackground"] = "#99FF99"
-
-        
-        strankovac.grid(row=4, column=0, columnspan=3, pady=15)
+        strankovac.config(bg="#409940", activebackground="#99FF99", font="Arial_black 8 bold", highlightbackground="#99FF99")        
+        strankovac.grid(row=4, column=1, pady=15)
            
         if len(kontakty)==0:
             kontakt = tk.Label(prihl_okno, text=u"Nemáte žádný uložený kontakt")
@@ -229,6 +225,44 @@ def prihlasit():
             global aktualni_hodnota
             aktualni_hodnota = hodnoty.get()           
 
+
+def pridat_kontakt():
+    global pridat_kontakt_okno
+    pridat_kontakt_okno = tk.Tk()
+    pridat_kontakt_frame = tk.Frame(pridat_kontakt_okno, bg="#32CD32")
+    pridat_kontakt_label = tk.Label(pridat_kontakt_frame, bg="#32CD32", text=u"Přidat kontakt", font="Arial_black 15 bold")
+    pridat_kontakt_label.grid(row=0, columnspan=3)
+    zkratka_label = tk.Label(pridat_kontakt_frame, text="Zkratka", bg="#32CD32", font="Arial_black 10 bold")
+    zkratka_label.grid(row=1, column=0)
+    pridat_cislo_label = tk.Label(pridat_kontakt_frame, text=u"Číslo", bg="#32CD32", font="Arial_black 10 bold")
+    pridat_cislo_label.grid(row=1, column=2)
+    jmeno_label = tk.Label(pridat_kontakt_frame, text=u"Jméno", bg="#32CD32", font="Arial_black 10 bold")
+    jmeno_label.grid(row=1, column=1)
+    zkratka_entry = tk.Entry(pridat_kontakt_frame, bg="#99FF99")
+    zkratka_entry.grid(row=2, column=0)
+    cislo_entry= tk.Entry(pridat_kontakt_frame, bg="#99FF99")
+    cislo_entry.grid(row=2, column=2)
+    jmeno_entry = tk.Entry(pridat_kontakt_frame, bg="#99FF99")
+    jmeno_entry.grid(row=2, column=1)
+    pridat_kontakt_button = tk.Button(pridat_kontakt_frame, text="Přidat kontakt", activebackground="#99FF99", bg="#409940", font="Arial_black 8 bold", command=lambda: pridat(zkratka_entry, cislo_entry, jmeno_entry))
+    pridat_kontakt_button.grid(row=3, columnspan=3)
+    pridat_kontakt_frame.grid(row=0, column=0)  
+    pridat_kontakt_okno.mainloop()
+    
+
+
+def dopln_cislo(blbost):
+    kontakty_mezikrok = urllib.urlopen("https://www.odorik.cz/api/v1/speed_dials.json?"+udaje)   ##získání kontaktů
+    kontakty_dalsi_mezikrok = kontakty_mezikrok.read()
+    kontakty = json.loads(kontakty_dalsi_mezikrok, object_hook=vypsat)
+    global zkratky_jmena
+    global zkratka_jmeno_promenna
+    global cislo_label
+    pozice = -1
+    for i in zkratky_jmena:
+        pozice = pozice+1
+        if i ==zkratka_jmeno_promenna.get():
+            cislo_label["text"] = str(kontakty[pozice][2])
 
 def kontakty_funkce(aktualni_hodnota):
     global aktualni_honota
@@ -637,6 +671,7 @@ def odebrat(zkratka_entry):
 
 def pridat(zkratka_entry, cislo_entry, jmeno_entry):
     global udaje
+    global pridat_kontakt_okno
     zkratka = zkratka_entry.get()
     cislo = cislo_entry.get()
     jmeno = jmeno_entry.get()
@@ -665,7 +700,8 @@ def pridat(zkratka_entry, cislo_entry, jmeno_entry):
     else:
         odpoved = json.loads(odpoved_mezikrok, object_hook=uspech)
         tkm.showinfo(u"Přidáno", u"Kontakt byl úspěšně přidán")
-    print odpoved
+        pridat_kontakt_okno.destroy()
+
     
        
         
@@ -712,29 +748,25 @@ def smazat(zkratka_entry, jmeno_entry, cislo_entry):        ##po kliknutí na tl
     cislo_entry.delete(0, tk.END)
 
 
-def callback(cislo_entry, jmeno_entry,):                 ##vyvolá okno po kliknutí na tlačítko callback
+def callback(cislo_label):                 ##vyvolá okno po kliknutí na tlačítko callback
     callback_hlavni_okno = tk.Tk()
     callback_okno = tk.Frame(callback_hlavni_okno, bg="#32CD32")
     callback_okno.grid()
-    
     callback_hlavni_okno.title("Callback")
-    if len(jmeno_entry.get())>0:
-        komu_volat = cislo_entry.get()+" ("+str(jmeno_entry.get())+")"
-    else:
-        komu_volat = cislo_entry.get()
-    callback_label = tk.Label(callback_okno, text="Volání na:  "+komu_volat, bg="#32CD32", font="Arial_black 15 bold")
+    komu_volat = cislo_label["text"]
+    callback_label = tk.Label(callback_okno, text=u"Volání na:  "+komu_volat, bg="#32CD32", font="Arial_black 15 bold")
     callback_label.grid(columnspan=2, sticky=tk.E+tk.W+tk.N+tk.S, padx=5, pady=5)
-    moje_cislo_label = tk.Label(callback_okno, text="Moje číslo", bg="#32CD32", font="Arial_black 10 bold")
+    moje_cislo_label = tk.Label(callback_okno, text=u"Moje číslo", bg="#32CD32", font="Arial_black 10 bold")
     moje_cislo_label.grid(row=1, columnspan=2, sticky=tk.E+tk.W+tk.N+tk.S)
     moje_cislo_entry = tk.Entry(callback_okno, width=35, justify="center", bg="#99FF99", relief="groove")
     moje_cislo_entry.grid(row=2, columnspan=2)
-    """
-    cislo_ulozit_button = tk.Button(callback_okno, text="Uložit", activebackground="#99FF99", command=lambda: ulozit_moje_cislo(moje_cislo_entry), bg="#409940", font="Arial_black 8 bold")
-    cislo_ulozit_button.grid(row=3, sticky=tk.E+tk.W+tk.N+tk.S, padx=5, pady=10)
-    cislo_vyplnit_button = tk.Button(callback_okno, text="Vyplnit", activebackground="#99FF99", font="Arial_black 8 bold", command=lambda: vyplnit_moje_cislo(moje_cislo_entry), bg="#409940")
-    cislo_vyplnit_button.grid(row=3, column=1, sticky=tk.E+tk.W+tk.N+tk.S, padx=5, pady=10)
-    """
-    objednat_callback_button = tk.Button(callback_okno, width=25, activebackground="#99FF99", text="Objednat callback", font="Arial_black 8 bold", command=lambda: objednat_callback(moje_cislo_entry, cislo_entry, udaje, callback_hlavni_okno), bg="#409940")
+
+    #cislo_ulozit_button = tk.Button(callback_okno, text="Uložit", activebackground="#99FF99", command=lambda: ulozit_moje_cislo(moje_cislo_entry), bg="#409940", font="Arial_black 8 bold")
+    #cislo_ulozit_button.grid(row=3, sticky=tk.E+tk.W+tk.N+tk.S, padx=5, pady=10)
+    #cislo_vyplnit_button = tk.Button(callback_okno, text="Vyplnit", activebackground="#99FF99", font="Arial_black 8 bold", command=lambda: vyplnit_moje_cislo(moje_cislo_entry), bg="#409940")
+    #cislo_vyplnit_button.grid(row=3, column=1, sticky=tk.E+tk.W+tk.N+tk.S, padx=5, pady=10)
+    
+    objednat_callback_button = tk.Button(callback_okno, width=25, activebackground="#99FF99", text="Objednat callback", font="Arial_black 8 bold", command=lambda: objednat_callback(moje_cislo_entry, cislo_label, udaje, callback_hlavni_okno), bg="#409940")
     objednat_callback_button.grid(row=4, columnspan=2, pady=10)
     spozdeny_callback_label = tk.Label(callback_okno, text="Objednat spoždený callback", bg="#32CD32", font="Arial_black 15 bold" )
     spozdeny_callback_label.grid(row=5, sticky=tk.E+tk.W+tk.N+tk.S, columnspan=2, padx=5, pady=10)
@@ -748,14 +780,14 @@ def callback(cislo_entry, jmeno_entry,):                 ##vyvolá okno po klikn
     datum_cas_callback_entry = tk.Entry(callback_okno, justify="center", bg="#99FF99", relief="groove")
     datum_cas_callback_entry.grid(row=7, column=1)
     datum_cas_callback_entry.insert(tk.END, "HH:MM:SS")
-    datum_callback_button = tk.Button(callback_okno, activebackground="#99FF99", text="Objednat dle data", font="Arial_black 8 bold", bg="#409940", command=lambda: callback_datum(moje_cislo_entry, cislo_entry, udaje, datum_callback_entry, datum_cas_callback_entry, callback_hlavni_okno), width=25)
+    datum_callback_button = tk.Button(callback_okno, activebackground="#99FF99", text="Objednat dle data", font="Arial_black 8 bold", bg="#409940", command=lambda: callback_datum(moje_cislo_entry, cislo_label, udaje, datum_callback_entry, datum_cas_callback_entry, callback_hlavni_okno), width=25)
     datum_callback_button.grid(row=8, columnspan=2, padx=5, pady=10)
     minuty_callback_label = tk.Label(callback_okno, text=u"Spoždění (minuty)", bg="#32CD32", font="Arial_black 10 bold")
     minuty_callback_label.grid(row=9, columnspan=2)
     minuty_callback_entry = tk.Entry(callback_okno, width=10, justify="center", bg="#99FF99", relief="groove")
     minuty_callback_entry.grid(row=10, columnspan=2)
     minuty_callback_entry.insert(tk.END, "1")
-    minuty_callback_button = tk.Button(callback_okno, activebackground="#99FF99", text="Objednat dle spoždění", font="Arial_black 8 bold", bg="#409940", command= lambda: callback_cas(moje_cislo_entry, cislo_entry, udaje, minuty_callback_entry, callback_hlavni_okno), width=25)
+    minuty_callback_button = tk.Button(callback_okno, activebackground="#99FF99", text="Objednat dle spoždění", font="Arial_black 8 bold", bg="#409940", command= lambda: callback_cas(moje_cislo_entry, cislo_label, udaje, minuty_callback_entry, callback_hlavni_okno), width=25)
     minuty_callback_button.grid(row=11, columnspan=2, padx=5, pady=10)
     callback_hlavni_okno.mainloop()
 
@@ -773,9 +805,9 @@ def vyplnit_moje_cislo(moje_cislo_entry):
     moje_cislo_entry.insert(tk.END, cislo)
 
 
-def callback_cas(moje_cislo_entry, cislo_entry, udaje, minuty_callback_entry,callback_hlavni_okno):
+def callback_cas(moje_cislo_entry, cislo_label, udaje, minuty_callback_entry,callback_hlavni_okno):
     moje_cislo = moje_cislo_entry.get()
-    volane_cislo = cislo_entry.get()
+    volane_cislo = cislo_label["text"]
     minuty = minuty_callback_entry.get()
     cisla = urllib.urlencode({'caller': moje_cislo, 'recipient': volane_cislo, 'delayed': minuty})
     vsechny_udaje = udaje+"&"+cisla
@@ -795,9 +827,9 @@ def callback_cas(moje_cislo_entry, cislo_entry, udaje, minuty_callback_entry,cal
         tkm.showwarning("CHYBA", u"Byl zadán špatný formát spoždění")
 
 
-def callback_datum(moje_cislo_entry, cislo_entry, udaje, datum_callback_entry, datum_cas_callback_entry,callback_hlavni_okno):
+def callback_datum(moje_cislo_entry, cislo_label, udaje, datum_callback_entry, datum_cas_callback_entry,callback_hlavni_okno):
     moje_cislo = moje_cislo_entry.get()
-    volane_cislo = cislo_entry.get()
+    volane_cislo = cislo_label["text"]
     datum = datum_callback_entry.get()+"T"+datum_cas_callback_entry.get()+"+01:00"
     cisla = urllib.urlencode({'caller': moje_cislo, 'recipient': volane_cislo, 'delayed': datum})
     vsechny_udaje = udaje+"&"+cisla
@@ -822,9 +854,9 @@ def callback_datum(moje_cislo_entry, cislo_entry, udaje, datum_callback_entry, d
 
 
 
-def objednat_callback(moje_cislo_entry, cislo_entry, udaje,callback_hlavni_okno):  ##objedná callback
+def objednat_callback(moje_cislo_entry, cislo_label, udaje,callback_hlavni_okno):  ##objedná callback
     moje_cislo = moje_cislo_entry.get()
-    volane_cislo = cislo_entry.get()
+    volane_cislo = cislo_label["text"]
     cisla = urllib.urlencode({'caller': moje_cislo, 'recipient': volane_cislo})
     vsechny_udaje = udaje+"&"+cisla
     objednat_callback = urllib.urlopen("https://www.odorik.cz/api/v1/callback", vsechny_udaje)
@@ -847,9 +879,10 @@ def ulozit_udaje():             # uloží údaje
     if ulozit_udaje_promenna.get() == 1: 
         ul_jmeno = prihl_jmeno_entry.get()
         ul_heslo = heslo_entry.get()
-        ul_udaje = ul_jmeno+ul_heslo
+        #ul_udaje = ul_jmeno+ul_heslo
         jmeno_a_heslo = open("jmeno_heslo.txt", "w")
-        jmeno_a_heslo.write(ul_udaje)
+        jmeno_a_heslo.write(ul_jmeno)
+        jmeno_a_heslo.write(ul_heslo)
         jmeno_a_heslo.close()
     if ulozit_udaje_promenna.get() == 0:
         jmeno_a_heslo = open("jmeno_heslo.txt", "w")
