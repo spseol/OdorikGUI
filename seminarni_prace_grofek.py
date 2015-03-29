@@ -71,21 +71,29 @@ def prihlasit():
         posl_hovor_mezikrok = zjistit_posl_hovor.read()
         posl_hovor_mezikrok2=json.loads(posl_hovor_mezikrok,object_hook=datum_cislo_cena)
         posl_hovor = posl_hovor_mezikrok2[len(posl_hovor_mezikrok2)-1]
+        pred_posl_hovor = posl_hovor_mezikrok2[len(posl_hovor_mezikrok2)-2]
+        pred_pred_posl_hovor = posl_hovor_mezikrok2[len(posl_hovor_mezikrok2)-3]
         posl_hovor_cena = "%.2f"%(posl_hovor_mezikrok2[len(posl_hovor_mezikrok2)-1][2])
         posl_hovor_datum = "%s %s.%s.%s"%(posl_hovor[0][11:19], posl_hovor[0][8:10], posl_hovor[0][5:7], posl_hovor[0][:4])
-        posl_hovor_cislo = posl_hovor[1][(len(posl_hovor[1])-9):]        
+        posl_hovor_cislo = posl_hovor[1][(len(posl_hovor[1])-9):] 
+        pred_posl_hovor_cena = "%.2f"%(posl_hovor_mezikrok2[len(posl_hovor_mezikrok2)-2][2])
+        pred_posl_hovor_datum = "%s %s.%s.%s"%(pred_posl_hovor[0][11:19], pred_posl_hovor[0][8:10], pred_posl_hovor[0][5:7], pred_posl_hovor[0][:4])
+        pred_posl_hovor_cislo = pred_posl_hovor[1][(len(pred_posl_hovor[1])-9):]
+        pred_pred_posl_hovor_cena = "%.2f"%(posl_hovor_mezikrok2[len(posl_hovor_mezikrok2)-3][2])
+        pred_pred_posl_hovor_datum = "%s %s.%s.%s"%(pred_pred_posl_hovor[0][11:19], pred_pred_posl_hovor[0][8:10], pred_pred_posl_hovor[0][5:7], pred_pred_posl_hovor[0][:4])
+        pred_pred_posl_hovor_cislo = pred_pred_posl_hovor[1][(len(posl_hovor[1])-9):]
         uplne_hl_okno.destroy()
         kontakty_okno = tk.Tk()
         prihl_okno = tk.Frame(kontakty_okno, bg="#32CD32")
         prihl_okno.grid()
         kontakty_okno.title("Kontakty")
 ############################################################################### horní informace
-        info_frame = tk.Frame(prihl_okno, bg="#32CD32")        
+        info_frame = tk.Frame(prihl_okno, bg="#32CD32")       
         kredit_label = tk.Label(info_frame, text="Váš kredit je: "+kredit+"Kč", bg="#32CD32", font="Arial_black 10 bold")   ##vypisuje kredit
-        kredit_label.grid(columnspan=3, sticky=tk.W)
-        posledni_hovor_frame = tk.Frame(info_frame, bg="#32CD32",bd=1)
-        posledni_hovor_label = tk.Label(posledni_hovor_frame, text="Poslední hovor:", bg="#32CD32", font="Arial_black 15 bold")
-        posledni_hovor_label.grid(row=1, columnspan=3)
+        kredit_label.grid(sticky=tk.W)
+        moje_cislo_ulozit_button = tk.Button(info_frame, text="Nastavit moje číslo", activebackground="#99FF99", command= nastavit_moje_cislo, bg="#409940", font="Arial_black 8 bold")
+        moje_cislo_ulozit_button.grid(column=2, row=0, sticky=tk.E, pady=2)
+        posledni_hovor_frame = tk.LabelFrame(info_frame, text="Poslední Hovory", bg="#32CD32", font="Arial_black 8 bold")
         posl_hov_datum = tk.Label(posledni_hovor_frame, text="Datum", width=20, bg="#32CD32", font="Arial_black 10 bold")
         posl_hov_datum.grid(row=2)
         posl_hov_cislo = tk.Label(posledni_hovor_frame, text="Číslo", width=20, bg="#32CD32", font="Arial_black 10 bold")
@@ -98,8 +106,20 @@ def prihlasit():
         posl_hov_cislo1.grid(row=3, column=1)
         posl_hov_cena1 = tk.Label(posledni_hovor_frame, text=str(posl_hovor_cena)+"Kč", width=20, bg="#32CD32", font="Arial_black 8 bold")
         posl_hov_cena1.grid(row=3, column=2)
-        posledni_hovor_frame.grid(pady=20)
-        info_frame.grid( columnspan=3)
+        pred_posl_hov_datum1 = tk.Label(posledni_hovor_frame, text=pred_posl_hovor_datum, width=20, bg="#32CD32", font="Arial_black 8 bold")
+        pred_posl_hov_datum1.grid(row=4)
+        pred_posl_hov_cislo1 = tk.Label(posledni_hovor_frame, text=pred_posl_hovor_cislo, width=20, bg="#32CD32", font="Arial_black 8 bold")
+        pred_posl_hov_cislo1.grid(row=4, column=1)
+        pred_posl_hov_cena1 = tk.Label(posledni_hovor_frame, text=str(pred_posl_hovor_cena)+"Kč", width=20, bg="#32CD32", font="Arial_black 8 bold")
+        pred_posl_hov_cena1.grid(row=4, column=2)
+        pred_pred_posl_hov_datum1 = tk.Label(posledni_hovor_frame, text=pred_pred_posl_hovor_datum, width=20, bg="#32CD32", font="Arial_black 8 bold")
+        pred_pred_posl_hov_datum1.grid(row=5)
+        pred_pred_posl_hov_cislo1 = tk.Label(posledni_hovor_frame, text=pred_pred_posl_hovor_cislo, width=20, bg="#32CD32", font="Arial_black 8 bold")
+        pred_pred_posl_hov_cislo1.grid(row=5, column=1)
+        pred_posl_hov_cena1 = tk.Label(posledni_hovor_frame, text=str(pred_pred_posl_hovor_cena)+"Kč", width=20, bg="#32CD32", font="Arial_black 8 bold")
+        pred_posl_hov_cena1.grid(row=5, column=2)
+        posledni_hovor_frame.grid(pady=1, columnspan=3)
+        info_frame.grid(row=1, columnspan=3)
 ###########################################################################      
         callback_frame = tk.LabelFrame(prihl_okno, text="Callback", bg="#32CD32", font="Arial_black 8 bold")
         global zkratka_jmeno_promenna
@@ -111,9 +131,13 @@ def prihlasit():
         global cislo_label
         cislo_label = tk.Label(callback_frame, bg="#99FF99", relief="groove", text=kontakty[0][2], width=60, font="Arial_black 10 bold")
         cislo_label.grid(row=1, sticky=tk.E+tk.W+tk.N+tk.S, padx= 10, pady=10)
-        callback_button = tk.Button(callback_frame, text="Objednat callback", font="Arial_black 10 bold", activebackground="#99FF99", command=lambda: callback(cislo_label), bg="#409940", width =40)
-        callback_button.grid(row=2, column=0, padx=40, pady=10)
-        callback_frame.grid(row=2, columnspan=3, sticky=tk.E+tk.W+tk.N+tk.S, padx= 10, pady=10)
+        callback_podframe = tk.Frame(callback_frame, bg="#32CD32")
+        callback_podframe.grid(row=2, sticky=tk.E+tk.W+tk.N+tk.S)
+        callback_button = tk.Button(callback_podframe, text="Objednat callback", font="Arial_black 10 bold", activebackground="#99FF99", command=lambda: objednat_callback(cislo_label, udaje), bg="#409940", width=25)
+        callback_button.grid(row=0, column=0, padx=20)
+        spozdeny_callback_button = tk.Button(callback_podframe, text="Objednat zpožděný callback", font="Arial_black 10 bold", activebackground="#99FF99", command=lambda:callback(cislo_label), bg="#409940", width=25)
+        spozdeny_callback_button.grid(row=0, column=1, sticky=tk.E, padx=20)
+        callback_frame.grid(row=2, columnspan=3, sticky=tk.E+tk.W+tk.N+tk.S, padx= 10, pady=5)
 ########################################################################### 
         pridat_button = tk.Button(prihl_okno, text="Přidat kontakt", font="Arial_black 8 bold", activebackground="#99FF99", bg="#409940", command=pridat_kontakt)
         pridat_button.grid(row=15, column=1, padx=20, pady=10)
@@ -227,6 +251,34 @@ def prihlasit():
             kontakty_okno.mainloop()
             global aktualni_hodnota
             aktualni_hodnota = hodnoty.get()           
+
+
+def nastavit_moje_cislo():
+    try:
+        moje_cislo_soubor = open("moje_cislo.txt", "r")        
+        moje_ulozene_cislo = moje_cislo_soubor.readline()
+        moje_cislo_soubor.close()
+    except:
+        moje_ulozene_cislo = ""
+    
+    nastavit_cislo_okno = tk.Tk()
+    nastavit_cislo_okno.title(u"Nastavení čísla")
+    nastavit_cislo = tk.Frame(nastavit_cislo_okno, bg="#32CD32")
+    nastavit_cislo_entry = tk.Entry(nastavit_cislo, justify="center", bg="#99FF99", relief="groove")
+    nastavit_cislo_entry.grid(row=0, padx=10, pady=10)
+    nastavit_cislo_entry.insert(tk.END, moje_ulozene_cislo)
+    nastavit_cislo_button = tk.Button(nastavit_cislo, text=u"Nastavit moje číslo", font="Arial_black 8 bold", activebackground="#99FF99", bg="#409940", command=lambda: ulozit_cislo(nastavit_cislo_entry, nastavit_cislo_okno))
+    nastavit_cislo_button.grid(row=1, padx=10, pady=10)
+    nastavit_cislo.grid()
+    nastavit_cislo_okno.mainloop()
+
+
+def ulozit_cislo(nastavit_cislo_entry, nastavit_cislo_okno):
+    cislo = nastavit_cislo_entry.get()
+    moje_cislo_soubor = open("moje_cislo.txt", "w")
+    moje_cislo_soubor.write(cislo)
+    moje_cislo_soubor.close() 
+    nastavit_cislo_okno.destroy()
 
 
 def pridat_kontakt():
@@ -711,42 +763,30 @@ def callback(cislo_label):                 ##vyvolá okno po kliknutí na tlač�
     callback_okno = tk.Frame(callback_hlavni_okno, bg="#32CD32")
     callback_okno.grid()
     callback_hlavni_okno.title("Callback")
-    komu_volat = cislo_label["text"]
-    callback_label = tk.Label(callback_okno, text=u"Volání na:  "+komu_volat, bg="#32CD32", font="Arial_black 15 bold")
-    callback_label.grid(columnspan=2, sticky=tk.E+tk.W+tk.N+tk.S, padx=5, pady=5)
-    moje_cislo_label = tk.Label(callback_okno, text=u"Moje číslo", bg="#32CD32", font="Arial_black 10 bold")
-    moje_cislo_label.grid(row=1, columnspan=2, sticky=tk.E+tk.W+tk.N+tk.S)
-    moje_cislo_entry = tk.Entry(callback_okno, width=35, justify="center", bg="#99FF99", relief="groove")
-    moje_cislo_entry.grid(row=2, columnspan=2)
-
-    #cislo_ulozit_button = tk.Button(callback_okno, text="Uložit", activebackground="#99FF99", command=lambda: ulozit_moje_cislo(moje_cislo_entry), bg="#409940", font="Arial_black 8 bold")
-    #cislo_ulozit_button.grid(row=3, sticky=tk.E+tk.W+tk.N+tk.S, padx=5, pady=10)
-    #cislo_vyplnit_button = tk.Button(callback_okno, text="Vyplnit", activebackground="#99FF99", font="Arial_black 8 bold", command=lambda: vyplnit_moje_cislo(moje_cislo_entry), bg="#409940")
-    #cislo_vyplnit_button.grid(row=3, column=1, sticky=tk.E+tk.W+tk.N+tk.S, padx=5, pady=10)
-    
-    objednat_callback_button = tk.Button(callback_okno, width=25, activebackground="#99FF99", text="Objednat callback", font="Arial_black 8 bold", command=lambda: objednat_callback(moje_cislo_entry, cislo_label, udaje, callback_hlavni_okno), bg="#409940")
-    objednat_callback_button.grid(row=4, columnspan=2, pady=10)
-    spozdeny_callback_label = tk.Label(callback_okno, text="Objednat spoždený callback", bg="#32CD32", font="Arial_black 15 bold" )
-    spozdeny_callback_label.grid(row=5, sticky=tk.E+tk.W+tk.N+tk.S, columnspan=2, padx=5, pady=10)
-    datum_callback_label = tk.Label(callback_okno, text="Datum", bg="#32CD32", font="Arial_black 10 bold")
-    datum_callback_label.grid(row=6)
-    datum_cas_callback_label = tk.Label(callback_okno, text=u"Čas", bg="#32CD32", font="Arial_black 10 bold")
-    datum_cas_callback_label.grid(row=6, column=1)
-    datum_callback_entry = tk.Entry(callback_okno, justify="center", bg="#99FF99", relief="groove")
-    datum_callback_entry.grid(row=7)
+    komu_volat = cislo_label["text"]   
+    callback_datum_frame = tk.LabelFrame(callback_okno, text="Objednat callback na určené datum", bg="#32CD32", font="Arial_black 8 bold")
+    callback_datum_frame.grid()
+    datum_callback_label = tk.Label(callback_datum_frame, text="Datum", bg="#32CD32", font="Arial_black 10 bold")
+    datum_callback_label.grid(row=0, column=0)
+    datum_cas_callback_label = tk.Label(callback_datum_frame, text=u"Čas", bg="#32CD32", font="Arial_black 10 bold")
+    datum_cas_callback_label.grid(row=0, column=1)
+    datum_callback_entry = tk.Entry(callback_datum_frame, justify="center", bg="#99FF99", relief="groove")
+    datum_callback_entry.grid(row=1, column=0)
     datum_callback_entry.insert(tk.END, "YYYY-MM-DD")
-    datum_cas_callback_entry = tk.Entry(callback_okno, justify="center", bg="#99FF99", relief="groove")
-    datum_cas_callback_entry.grid(row=7, column=1)
+    datum_cas_callback_entry = tk.Entry(callback_datum_frame, justify="center", bg="#99FF99", relief="groove")
+    datum_cas_callback_entry.grid(row=1, column=1)
     datum_cas_callback_entry.insert(tk.END, "HH:MM:SS")
-    datum_callback_button = tk.Button(callback_okno, activebackground="#99FF99", text="Objednat dle data", font="Arial_black 8 bold", bg="#409940", command=lambda: callback_datum(moje_cislo_entry, cislo_label, udaje, datum_callback_entry, datum_cas_callback_entry, callback_hlavni_okno), width=25)
-    datum_callback_button.grid(row=8, columnspan=2, padx=5, pady=10)
-    minuty_callback_label = tk.Label(callback_okno, text=u"Spoždění (minuty)", bg="#32CD32", font="Arial_black 10 bold")
-    minuty_callback_label.grid(row=9, columnspan=2)
-    minuty_callback_entry = tk.Entry(callback_okno, width=10, justify="center", bg="#99FF99", relief="groove")
-    minuty_callback_entry.grid(row=10, columnspan=2)
+    datum_callback_button = tk.Button(callback_datum_frame, activebackground="#99FF99", text="Objednat dle data", font="Arial_black 8 bold", bg="#409940", command=lambda: callback_datum(moje_cislo_entry, cislo_label, udaje, datum_callback_entry, datum_cas_callback_entry, callback_hlavni_okno), width=25)
+    datum_callback_button.grid(row=2, columnspan=2, padx=5, pady=10)
+    callback_cas_frame = tk.LabelFrame(callback_okno, text="Objednat callback na určený čas", bg="#32CD32", font="Arial_black 8 bold")
+    callback_cas_frame.grid(row=1)
+    minuty_callback_label = tk.Label(callback_cas_frame, text=u"Zpoždění (minuty)", bg="#32CD32", font="Arial_black 10 bold")
+    minuty_callback_label.grid(row=0, column=0, columnspan=2)
+    minuty_callback_entry = tk.Entry(callback_cas_frame, width=10, justify="center", bg="#99FF99", relief="groove")
+    minuty_callback_entry.grid(row=1, column=0, columnspan=2)
     minuty_callback_entry.insert(tk.END, "1")
-    minuty_callback_button = tk.Button(callback_okno, activebackground="#99FF99", text="Objednat dle spoždění", font="Arial_black 8 bold", bg="#409940", command= lambda: callback_cas(moje_cislo_entry, cislo_label, udaje, minuty_callback_entry, callback_hlavni_okno), width=25)
-    minuty_callback_button.grid(row=11, columnspan=2, padx=5, pady=10)
+    minuty_callback_button = tk.Button(callback_cas_frame, activebackground="#99FF99", text="Objednat dle zpoždění", font="Arial_black 8 bold", bg="#409940", command= lambda: callback_cas(moje_cislo_entry, cislo_label, udaje, minuty_callback_entry, callback_hlavni_okno), width=25)
+    minuty_callback_button.grid(row=2, column=0, columnspan=2)
     callback_hlavni_okno.mainloop()
 
 
@@ -799,8 +839,13 @@ def callback_datum(moje_cislo_entry, cislo_label, udaje, datum_callback_entry, d
 
 
 
-def objednat_callback(moje_cislo_entry, cislo_label, udaje,callback_hlavni_okno):  ##objedná callback
-    moje_cislo = moje_cislo_entry.get()
+def objednat_callback(cislo_label,udaje):  ##objedná callback
+    try:
+        moje_cislo_soubor = open("moje_cislo.txt", "r")        
+        moje_cislo = moje_cislo_soubor.readline()
+        moje_cislo_soubor.close()
+    except:
+        tkm.showwarning("CHYBA",u"Nemáte nastavené vaše číslo")
     volane_cislo = cislo_label["text"]
     cisla = urllib.urlencode({'caller': moje_cislo, 'recipient': volane_cislo})
     vsechny_udaje = udaje+"&"+cisla
@@ -808,14 +853,11 @@ def objednat_callback(moje_cislo_entry, cislo_label, udaje,callback_hlavni_okno)
     odpoved =  objednat_callback.read()
     if odpoved == "callback_ordered":
         tkm.showinfo("Callback", u"Callback byl úspěšně objednán")
-        callback_hlavni_okno.destroy()
     elif odpoved == "error callback_failed":
         tkm.showwarning("Callback", u"Požadavek se nepodařilo odeslat na Odorik.cz")
-        callback_hlavni_okno.destroy()
     elif odpoved[:22] == "error missing_argument":
         tkm.showwarning("CHYBA", u"Chybí jeden nebo více argumentů")
-        callback_hlavni_okno.destroy()
-    
+
 
 #############################################################################
 
