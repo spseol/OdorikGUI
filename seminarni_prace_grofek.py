@@ -3,6 +3,7 @@
 Created on Thu Jan 29 21:04:50 2015
 @author: Tom
 """
+import requests
 import json
 import urllib
 import Tkinter as tk
@@ -28,7 +29,9 @@ def datum_cislo_cena(posl_hovor):
 
 def prihlasit():
     ulozit_udaje()
+    global prihl_jmeno
     prihl_jmeno = prihl_jmeno_entry.get()
+    global heslo
     heslo = heslo_entry.get()
     global udaje
     udaje = urllib.urlencode({"user": prihl_jmeno, "password": heslo})            ## přihlašovací údaje jako parametr    
@@ -134,14 +137,15 @@ def prihlasit():
         callback_podframe = tk.Frame(callback_frame, bg="#32CD32")
         callback_podframe.grid(row=2, sticky=tk.E+tk.W+tk.N+tk.S)
         callback_button = tk.Button(callback_podframe, text="Objednat callback", font="Arial_black 10 bold", activebackground="#99FF99", command=lambda: objednat_callback(cislo_label, udaje), bg="#409940", width=25)
-        callback_button.grid(row=0, column=0, padx=20)
+        callback_button.grid(row=0, column=0, padx=20, pady=5)
         spozdeny_callback_button = tk.Button(callback_podframe, text="Objednat zpožděný callback", font="Arial_black 10 bold", activebackground="#99FF99", command=lambda:callback(cislo_label), bg="#409940", width=25)
-        spozdeny_callback_button.grid(row=0, column=1, sticky=tk.E, padx=20)
+        spozdeny_callback_button.grid(row=0, column=1, sticky=tk.E, padx=20, pady=5)
         callback_frame.grid(row=2, columnspan=3, sticky=tk.E+tk.W+tk.N+tk.S, padx= 10, pady=5)
 ########################################################################### 
         pridat_button = tk.Button(prihl_okno, text="Přidat kontakt", font="Arial_black 8 bold", activebackground="#99FF99", bg="#409940", command=pridat_kontakt)
-        pridat_button.grid(row=15, column=1, padx=20, pady=10)
-        
+        pridat_button.grid(row=4, column=2, padx=20, pady=10)
+        odebrat_button = tk.Button(prihl_okno, text="Odebrat kontakt", command=odebrat, font="Arial_black 8 bold", activebackground="#99FF99", bg="#409940")
+        odebrat_button.grid(row=4, column=0)
         global seznam_hodnot
         seznam_hodnot = []
         for i in range(1+len(kontakty)/10):
@@ -706,19 +710,30 @@ def kontakty_funkce(aktualni_hodnota):
                     kontakt10_jmeno["text"] = kontakty[pozice+9][1]
                     kontakt10_cislo["text"] = kontakty[pozice+9][2][-9:]
 
-                
+
+def odebrat():
+    odebrat_okno = tk.Tk()
+    odebrat_frame = tk.Frame(odebrat_okno, bg="#32CD32")
+    odebrat_frame.grid()
+    odebrat_label = tk.Label(odebrat_frame, bg="#32CD32", text="Zadejte zkratku", font="Arial_black 10 bold")
+    odebrat_label.grid(row=0, column=0, padx=10, pady=2)
+    odebrat_entry = tk.Entry(odebrat_frame, justify="center", bg="#99FF99", relief="groove")
+    odebrat_entry.grid(row=1, column=0, padx=10, pady=0)
+    odebrat_button = tk.Button(odebrat_frame, activebackground="#99FF99", text="Odebrat kontakt", font="Arial_black 8 bold", bg="#409940", command=lambda: odebrat_funkce(odebrat_entry.get()))
+    odebrat_button.grid(row=2, column=0, padx=10, pady=10)
+    odebrat_okno.mainloop()
 
 
 
-#def odebrat(zkratka_entry):
-#    global udaje
-#    zkratka = zkratka_entry.get()
-#    prihl=httplib.HTTPSConnection("www.odorik.cz")
-#    prihl.request('DELETE', "/api/v1/speed_dials/"+zkratka+".json", udaje)
-#    odp = prihl.getresponse()
-#    odpoved = odp.read()
-#    print odpoved
-#    prihl.close()
+def odebrat_funkce(zkratka):
+    print prihl_jmeno,heslo
+    global udaje
+    print udaje
+    smazat = requests.delete(url='https://www.odorik.cz/api/v1/speed_dials/'+zkratka+'.json', params=udaje)
+    print smazat.text
+    if smazat.text == "{}":
+        tkm.showinfo(u"Úspěch", "kontakt byl úspěšně smazán")
+
     
         
 
@@ -765,33 +780,42 @@ def callback(cislo_label):                 ##vyvolá okno po kliknutí na tlač�
     callback_hlavni_okno.title("Callback")
     komu_volat = cislo_label["text"]   
     callback_datum_frame = tk.LabelFrame(callback_okno, text="Objednat callback na určené datum", bg="#32CD32", font="Arial_black 8 bold")
-    callback_datum_frame.grid()
+    callback_datum_frame.grid(padx=10, pady=5)
     datum_callback_label = tk.Label(callback_datum_frame, text="Datum", bg="#32CD32", font="Arial_black 10 bold")
     datum_callback_label.grid(row=0, column=0)
     datum_cas_callback_label = tk.Label(callback_datum_frame, text=u"Čas", bg="#32CD32", font="Arial_black 10 bold")
     datum_cas_callback_label.grid(row=0, column=1)
+    global datum_callback_entry
     datum_callback_entry = tk.Entry(callback_datum_frame, justify="center", bg="#99FF99", relief="groove")
     datum_callback_entry.grid(row=1, column=0)
     datum_callback_entry.insert(tk.END, "YYYY-MM-DD")
+    global datum_cas_callback_entry
     datum_cas_callback_entry = tk.Entry(callback_datum_frame, justify="center", bg="#99FF99", relief="groove")
     datum_cas_callback_entry.grid(row=1, column=1)
     datum_cas_callback_entry.insert(tk.END, "HH:MM:SS")
-    datum_callback_button = tk.Button(callback_datum_frame, activebackground="#99FF99", text="Objednat dle data", font="Arial_black 8 bold", bg="#409940", command=lambda: callback_datum(moje_cislo_entry, cislo_label, udaje, datum_callback_entry, datum_cas_callback_entry, callback_hlavni_okno), width=25)
+    datum_callback_button = tk.Button(callback_datum_frame, activebackground="#99FF99", text="Objednat dle data", font="Arial_black 8 bold", bg="#409940", command=lambda: callback_datum(cislo_label, udaje, datum_callback_entry, datum_cas_callback_entry, callback_hlavni_okno), width=25)
     datum_callback_button.grid(row=2, columnspan=2, padx=5, pady=10)
     callback_cas_frame = tk.LabelFrame(callback_okno, text="Objednat callback na určený čas", bg="#32CD32", font="Arial_black 8 bold")
-    callback_cas_frame.grid(row=1)
+    callback_cas_frame.grid(row=1, pady=10)
     minuty_callback_label = tk.Label(callback_cas_frame, text=u"Zpoždění (minuty)", bg="#32CD32", font="Arial_black 10 bold")
     minuty_callback_label.grid(row=0, column=0, columnspan=2)
+    global minuty_callback_entry
     minuty_callback_entry = tk.Entry(callback_cas_frame, width=10, justify="center", bg="#99FF99", relief="groove")
     minuty_callback_entry.grid(row=1, column=0, columnspan=2)
     minuty_callback_entry.insert(tk.END, "1")
-    minuty_callback_button = tk.Button(callback_cas_frame, activebackground="#99FF99", text="Objednat dle zpoždění", font="Arial_black 8 bold", bg="#409940", command= lambda: callback_cas(moje_cislo_entry, cislo_label, udaje, minuty_callback_entry, callback_hlavni_okno), width=25)
-    minuty_callback_button.grid(row=2, column=0, columnspan=2)
+    minuty_callback_button = tk.Button(callback_cas_frame, activebackground="#99FF99", text="Objednat dle zpoždění", font="Arial_black 8 bold", bg="#409940", command=lambda: callback_cas(cislo_label, udaje, callback_hlavni_okno, minuty_callback_entry), width=25)
+    minuty_callback_button.grid(row=2, column=0, columnspan=2, pady=5)
     callback_hlavni_okno.mainloop()
 
 
-def callback_cas(moje_cislo_entry, cislo_label, udaje, minuty_callback_entry,callback_hlavni_okno):
-    moje_cislo = moje_cislo_entry.get()
+def callback_cas(cislo_label, udaje, callback_hlavni_okno, minuty_callback_entry):
+    try:
+        moje_cislo_soubor = open("moje_cislo.txt", "r")
+        moje_cislo = moje_cislo_soubor.readline()
+        moje_cislo_soubor.close()
+    except:
+        tkm.showwarning("CHYBA", u"Nemáte nastavené vaše číslo")
+        callback_hlavni_okno.destroy()
     volane_cislo = cislo_label["text"]
     minuty = minuty_callback_entry.get()
     cisla = urllib.urlencode({'caller': moje_cislo, 'recipient': volane_cislo, 'delayed': minuty})
@@ -803,26 +827,28 @@ def callback_cas(moje_cislo_entry, cislo_label, udaje, minuty_callback_entry,cal
         callback_hlavni_okno.destroy()
     elif odpoved == "error callback_failed":
         tkm.showwarning("Callback", u"Požadavek se nepodařilo odeslat na Odorik.cz")
-        callback_hlavni_okno.destroy()
     elif odpoved[:22] == "error missing_argument":
         tkm.showwarning("CHYBA", u"Chybí jeden nebo více argumentů")
-        callback_hlavni_okno.destroy()
     elif odpoved == "error invalid_delay_format":
-        callback_hlavni_okno.destroy()
         tkm.showwarning("CHYBA", u"Byl zadán špatný formát spoždění")
 
 
-def callback_datum(moje_cislo_entry, cislo_label, udaje, datum_callback_entry, datum_cas_callback_entry,callback_hlavni_okno):
-    moje_cislo = moje_cislo_entry.get()
+def callback_datum( cislo_label, udaje, datum_callback_entry, datum_cas_callback_entry, callback_hlavni_okno):
+    try:
+        moje_cislo_soubor = open("moje_cislo.txt", "r")
+        moje_cislo = moje_cislo_soubor.readline()
+        moje_cislo_soubor.close()
+    except:
+        tkm.showwarning("CHYBA", u"Nemáte nastavené vaše číslo")
+        callback_hlavni_okno.destroy()
     volane_cislo = cislo_label["text"]
-    datum = datum_callback_entry.get()+"T"+datum_cas_callback_entry.get()+"+01:00"
+    datum = datum_callback_entry.get()+"T"+datum_cas_callback_entry.get()+"+02:00"
     cisla = urllib.urlencode({'caller': moje_cislo, 'recipient': volane_cislo, 'delayed': datum})
     vsechny_udaje = udaje+"&"+cisla
     objednat_callback = urllib.urlopen("https://www.odorik.cz/api/v1/callback", vsechny_udaje)
-    odpoved =  objednat_callback.read()
-    print odpoved
+    odpoved = objednat_callback.read()
     if odpoved == "successfully_enqueued":
-        tkm.showinfo("Callback" ,u"Callback byl úspěšně objednán")
+        tkm.showinfo("Callback", u"Callback byl úspěšně objednán")
         callback_hlavni_okno.destroy()
     elif odpoved == "error callback_failed":
         tkm.showwarning("Callback", u"Požadavek se nepodařilo odeslat na Odorik.cz")
