@@ -12,6 +12,8 @@ import httplib
 import datetime
 ##############################################################################
 ##############################################################################
+
+
 def erory(odpoved):
     return odpoved["errors"]
 
@@ -42,6 +44,7 @@ def prihlasit():
     elif kredit == "error authentication_failed":     ## špatně zadané údaje
         tkm.showwarning("CHYBA", u"Zadal/a jste špatné přihlašovací údaje")
     else:                                           ## dobře zadané údaje
+        global kontakty
         kontakty_mezikrok = urllib.urlopen("https://www.odorik.cz/api/v1/speed_dials.json?"+udaje)   ##získání kontaktů
         kontakty_dalsi_mezikrok = kontakty_mezikrok.read()
         kontakty = json.loads(kontakty_dalsi_mezikrok, object_hook=vypsat)          ##kontakty jako 3-členné ntice v seznamu
@@ -57,6 +60,27 @@ def prihlasit():
             else:
                 zapsat = "%s  %s" % (i[0], i[1])
                 zkratky_jmena.append(zapsat)
+        zkratky_jmena_cisla = []
+        for i in kontakty:
+            if len(str(i[0])) == 1:
+                zapsat = "%s      %s" % (i[0], i[1])
+            elif len(str(i[0])) == 2:
+                zapsat = "%s    %s" % (i[0], i[1])
+            else:
+                zapsat = "%s  %s" % (i[0], i[1])
+            if len(zapsat) > 65:
+                zapsat = zapsat[:60]+"...  "
+            for y in range(65-len(zapsat)):
+                zapsat = zapsat+" "
+            print len(zapsat)
+            if len(kontakty[2]) > 20:
+                zapsat = zapsat+i[2][:20]
+            else:
+                zapsat = zapsat+i[2]
+            zkratky_jmena_cisla.append(zapsat)
+        
+                
+                
         dnes = datetime.datetime.now()
         mesic = "%d" % dnes.month
         mesic = int(mesic)
@@ -90,8 +114,8 @@ def prihlasit():
         prihl_okno = tk.Frame(kontakty_okno, bg="#32CD32")
         prihl_okno.grid()
         kontakty_okno.title("Kontakty")
-############################################################################### horní informace
-        info_frame = tk.Frame(prihl_okno, bg="#32CD32")       
+# ############################################################################## horní informace
+        info_frame = tk.Frame(prihl_okno, bg="#32CD32")
         kredit_label = tk.Label(info_frame, text="Váš kredit je: "+kredit+"Kč", bg="#32CD32", font="Arial_black 10 bold")   ##vypisuje kredit
         kredit_label.grid(sticky=tk.W)
         moje_cislo_ulozit_button = tk.Button(info_frame, text="Nastavit moje číslo", activebackground="#99FF99", command= nastavit_moje_cislo, bg="#409940", font="Arial_black 8 bold")
@@ -123,47 +147,31 @@ def prihlasit():
         pred_posl_hov_cena1.grid(row=5, column=2)
         posledni_hovor_frame.grid(pady=1, columnspan=3, sticky=tk.E+tk.W+tk.N+tk.S)
         info_frame.grid(row=1, columnspan=3, padx=10)
-###########################################################################      
-        callback_frame = tk.LabelFrame(prihl_okno, text="Callback", bg="#32CD32", font="Arial_black 8 bold")
-        global zkratka_jmeno_promenna
-        zkratka_jmeno_promenna = tk.StringVar(callback_frame)
-        zkratka_jmeno_promenna.set(zkratky_jmena[0])
-        zkratka_optmenu = tk.OptionMenu(callback_frame, zkratka_jmeno_promenna, *zkratky_jmena, command= dopln_cislo)
-        zkratka_optmenu.config(bg="#409940", activebackground="#99FF99", font="Arial_black 10 bold", highlightbackground="#99FF99")                                    
-        zkratka_optmenu.grid(row=0, sticky=tk.E+tk.W+tk.N+tk.S, padx= 10, pady=10)
-        global cislo_label
-        cislo_label = tk.Label(callback_frame, bg="#99FF99", relief="groove", text=kontakty[0][2], width=65, font="Arial_black 10 bold")
-        cislo_label.grid(row=1, sticky=tk.E+tk.W+tk.N+tk.S, padx= 10, pady=10)
-        callback_podframe = tk.Frame(callback_frame, bg="#32CD32")
-        callback_podframe.grid(row=2, sticky=tk.E+tk.W+tk.N+tk.S)
-        callback_button = tk.Button(callback_podframe, text="Objednat callback", font="Arial_black 10 bold", activebackground="#99FF99", command=lambda: objednat_callback(cislo_label, udaje), bg="#409940", width=25)
-        callback_button.grid(row=0, column=0, padx=28, pady=5, sticky=tk.W)
-        spozdeny_callback_button = tk.Button(callback_podframe, text="Objednat zpožděný callback", font="Arial_black 10 bold", activebackground="#99FF99", command=lambda:callback(cislo_label), bg="#409940", width=25)
-        spozdeny_callback_button.grid(row=0, column=1, sticky=tk.E, padx=28, pady=5)
-        callback_frame.grid(row=2, columnspan=3, sticky=tk.E+tk.W+tk.N+tk.S, padx= 10, pady=5)
-########################################################################### 
+# ##########################################################################
         kontakty_frame = tk.LabelFrame(prihl_okno, text="Kontakty", bg="#32CD32", font="Arial_black 8 bold")
-        listboxy_frame = tk.Frame(kontakty_frame, bg="#32CD32")
-        listboxy_frame.grid(row=0, column=0, padx=5)
-        scrollbar = tk.Scrollbar(listboxy_frame, orient=tk.VERTICAL)
-        listbox = tk.Listbox(listboxy_frame, yscrollcommand=scrollbar.set, width=50, bg="#99FF99", font="Arial_black 8 bold", bd=0)
-        listbox2 = tk.Listbox(listboxy_frame, yscrollcommand=scrollbar.set, width=35, bg="#99FF99", font="Arial_black 8 bold", bd=0) 
-        scrollbar.grid(row=0, column=2, sticky=tk.S+tk.N)
-        listbox2.grid(row=0, column=1)
-        listbox.grid(row=0, column=0)
+        callback_podframe = tk.Frame(kontakty_frame, bg="#32CD32")
+        callback_podframe.grid(row=0, sticky=tk.E+tk.W+tk.N+tk.S, column=0)
+        callback_button = tk.Button(callback_podframe, text="Objednat callback nyní", font="Arial_black 10 bold", activebackground="#99FF99", command=lambda: objednat_callback(listbox, udaje), bg="#409940", width=25)
+        callback_button.grid(row=0, column=0, padx=28, pady=5, sticky=tk.W)
+        spozdeny_callback_button = tk.Button(callback_podframe, text="Objednat zpožděný callback", font="Arial_black 10 bold", activebackground="#99FF99", command=lambda: callback(listbox), bg="#409940", width=25)
+        spozdeny_callback_button.grid(row=0, column=1, sticky=tk.E, padx=28, pady=5)
+        listbox_frame = tk.Frame(kontakty_frame, bg="#32CD32")
+        listbox_frame.grid(row=1, column=0, padx=7)
+        scrollbar = tk.Scrollbar(listbox_frame, orient=tk.VERTICAL)
+        listbox = tk.Listbox(listbox_frame, yscrollcommand=scrollbar.set, width=85, bg="#99FF99", font="Arial_black 8 bold", bd=0)
         scrollbar.config(command=listbox.yview)
-        scrollbar.config(command=listbox2.yview)
-        for i in kontakty:
-            listbox2.insert(tk.END, i[2])
-        for i in zkratky_jmena:
+        listbox.grid(row=0, column=0)
+        for i in zkratky_jmena_cisla:
             listbox.insert(tk.END, i)
+        scrollbar.grid(row=0, column=1, sticky=tk.S+tk.N)
         kontakty_frame.grid(row=3, columnspan=3, padx=10, pady=10, sticky=tk.E+tk.W+tk.N+tk.S)
         kontakty_buttony_frame = tk.Frame(kontakty_frame, bg="#32CD32")
         pridat_button = tk.Button(kontakty_buttony_frame, text="Přidat kontakt", font="Arial_black 8 bold", activebackground="#99FF99", bg="#409940", command=pridat_kontakt)
         pridat_button.grid(row=0, column=0, padx=20, pady=10)
         odebrat_button = tk.Button(kontakty_buttony_frame, text="Odebrat kontakt", command=odebrat, font="Arial_black 8 bold", activebackground="#99FF99", bg="#409940")
-        odebrat_button.grid(row=0, column=1,pady=10 , padx=20)
-        kontakty_buttony_frame.grid(row=1, columnspan=3)
+        odebrat_button.grid(row=0, column=1, pady=10, padx=20)
+        kontakty_buttony_frame.grid(row=2, columnspan=3)
+
 
 
 def nastavit_moje_cislo():
@@ -216,21 +224,6 @@ def pridat_kontakt():
     pridat_kontakt_button.grid(row=3, columnspan=3)
     pridat_kontakt_frame.grid(row=0, column=0)  
     pridat_kontakt_okno.mainloop()
-    
-
-
-def dopln_cislo(blbost):
-    kontakty_mezikrok = urllib.urlopen("https://www.odorik.cz/api/v1/speed_dials.json?"+udaje)   ##získání kontaktů
-    kontakty_dalsi_mezikrok = kontakty_mezikrok.read()
-    kontakty = json.loads(kontakty_dalsi_mezikrok, object_hook=vypsat)
-    global zkratky_jmena
-    global zkratka_jmeno_promenna
-    global cislo_label
-    pozice = -1
-    for i in zkratky_jmena:
-        pozice = pozice+1
-        if i ==zkratka_jmeno_promenna.get():
-            cislo_label["text"] = str(kontakty[pozice][2])
 
 
 def odebrat():
@@ -248,11 +241,8 @@ def odebrat():
 
 
 def odebrat_funkce(zkratka):
-    print prihl_jmeno,heslo
     global udaje
-    print udaje
     smazat = requests.delete(url='https://www.odorik.cz/api/v1/speed_dials/'+zkratka+'.json', params=udaje)
-    print smazat.text
     if smazat.text == "{}":
         tkm.showinfo(u"Úspěch", "kontakt byl úspěšně smazán")
 
@@ -295,50 +285,61 @@ def pridat(zkratka_entry, cislo_entry, jmeno_entry):
         pridat_kontakt_okno.destroy()
 
 
-def callback(cislo_label):                 ##vyvolá okno po kliknutí na tlačítko callback
-    callback_hlavni_okno = tk.Tk()
-    callback_okno = tk.Frame(callback_hlavni_okno, bg="#32CD32")
-    callback_okno.grid()
-    callback_hlavni_okno.title("Callback")
-    komu_volat = cislo_label["text"]   
-    callback_datum_frame = tk.LabelFrame(callback_okno, text="Objednat callback na určené datum", bg="#32CD32", font="Arial_black 8 bold")
-    callback_datum_frame.grid(padx=10, pady=5)
-    datum_callback_label = tk.Label(callback_datum_frame, text="Datum", bg="#32CD32", font="Arial_black 10 bold")
-    datum_callback_label.grid(row=0, column=0)
-    datum_cas_callback_label = tk.Label(callback_datum_frame, text=u"Čas", bg="#32CD32", font="Arial_black 10 bold")
-    datum_cas_callback_label.grid(row=0, column=1)
-    global datum_callback_entry
-    datum_callback_entry = tk.Entry(callback_datum_frame, justify="center", bg="#99FF99", relief="groove")
-    datum_callback_entry.grid(row=1, column=0)
-    datum_callback_entry.insert(tk.END, "YYYY-MM-DD")
-    global datum_cas_callback_entry
-    datum_cas_callback_entry = tk.Entry(callback_datum_frame, justify="center", bg="#99FF99", relief="groove")
-    datum_cas_callback_entry.grid(row=1, column=1)
-    datum_cas_callback_entry.insert(tk.END, "HH:MM:SS")
-    datum_callback_button = tk.Button(callback_datum_frame, activebackground="#99FF99", text="Objednat dle data", font="Arial_black 8 bold", bg="#409940", command=lambda: callback_datum(cislo_label, udaje, datum_callback_entry, datum_cas_callback_entry, callback_hlavni_okno), width=25)
-    datum_callback_button.grid(row=2, columnspan=2, padx=5, pady=10)
-    callback_cas_frame = tk.LabelFrame(callback_okno, text="Objednat callback na určený čas", bg="#32CD32", font="Arial_black 8 bold")
-    callback_cas_frame.grid(row=1, pady=10)
-    minuty_callback_label = tk.Label(callback_cas_frame, text=u"Zpoždění (minuty)", bg="#32CD32", font="Arial_black 10 bold")
-    minuty_callback_label.grid(row=0, column=0, columnspan=2)
-    global minuty_callback_entry
-    minuty_callback_entry = tk.Entry(callback_cas_frame, width=10, justify="center", bg="#99FF99", relief="groove")
-    minuty_callback_entry.grid(row=1, column=0, columnspan=2)
-    minuty_callback_entry.insert(tk.END, "1")
-    minuty_callback_button = tk.Button(callback_cas_frame, activebackground="#99FF99", text="Objednat dle zpoždění", font="Arial_black 8 bold", bg="#409940", command=lambda: callback_cas(cislo_label, udaje, callback_hlavni_okno, minuty_callback_entry), width=25)
-    minuty_callback_button.grid(row=2, column=0, columnspan=2, pady=5)
-    callback_hlavni_okno.mainloop()
-
-
-def callback_cas(cislo_label, udaje, callback_hlavni_okno, minuty_callback_entry):
+def callback(listbox):                 ##vyvolá okno po kliknutí na tlačítko callback
+    global kontakty
     try:
         moje_cislo_soubor = open("moje_cislo.txt", "r")
         moje_cislo = moje_cislo_soubor.readline()
         moje_cislo_soubor.close()
     except:
         tkm.showwarning("CHYBA", u"Nemáte nastavené vaše číslo")
-        callback_hlavni_okno.destroy()
-    volane_cislo = cislo_label["text"]
+    else:
+        try:  
+            zvoleny_kontakt = map(int, listbox.curselection())
+            volane_cislo = kontakty[zvoleny_kontakt[0]][2]
+            callback_hlavni_okno = tk.Tk()
+            callback_okno = tk.Frame(callback_hlavni_okno, bg="#32CD32")
+            callback_okno.grid()
+            callback_hlavni_okno.title("Callback")
+            komu_volat = cislo_label["text"]   
+            callback_datum_frame = tk.LabelFrame(callback_okno, text="Objednat callback na určené datum", bg="#32CD32", font="Arial_black 8 bold")
+            callback_datum_frame.grid(padx=10, pady=5)
+            datum_callback_label = tk.Label(callback_datum_frame, text="Datum", bg="#32CD32", font="Arial_black 10 bold")
+            datum_callback_label.grid(row=0, column=0)
+            datum_cas_callback_label = tk.Label(callback_datum_frame, text=u"Čas", bg="#32CD32", font="Arial_black 10 bold")
+            datum_cas_callback_label.grid(row=0, column=1)
+            global datum_callback_entry
+            datum_callback_entry = tk.Entry(callback_datum_frame, justify="center", bg="#99FF99", relief="groove")
+            datum_callback_entry.grid(row=1, column=0)
+            datum_callback_entry.insert(tk.END, "YYYY-MM-DD")
+            global datum_cas_callback_entry
+            datum_cas_callback_entry = tk.Entry(callback_datum_frame, justify="center", bg="#99FF99", relief="groove")
+            datum_cas_callback_entry.grid(row=1, column=1)
+            datum_cas_callback_entry.insert(tk.END, "HH:MM:SS")
+            datum_callback_button = tk.Button(callback_datum_frame, activebackground="#99FF99", text="Objednat dle data", font="Arial_black 8 bold", bg="#409940", command=lambda: callback_datum(listbox, udaje, datum_callback_entry, datum_cas_callback_entry, callback_hlavni_okno), width=25)
+            datum_callback_button.grid(row=2, columnspan=2, padx=5, pady=10)
+            callback_cas_frame = tk.LabelFrame(callback_okno, text="Objednat callback na určený čas", bg="#32CD32", font="Arial_black 8 bold")
+            callback_cas_frame.grid(row=1, pady=10)
+            minuty_callback_label = tk.Label(callback_cas_frame, text=u"Zpoždění (minuty)", bg="#32CD32", font="Arial_black 10 bold")
+            minuty_callback_label.grid(row=0, column=0, columnspan=2)
+            global minuty_callback_entry
+            minuty_callback_entry = tk.Entry(callback_cas_frame, width=10, justify="center", bg="#99FF99", relief="groove")
+            minuty_callback_entry.grid(row=1, column=0, columnspan=2)
+            minuty_callback_entry.insert(tk.END, "1")
+            minuty_callback_button = tk.Button(callback_cas_frame, activebackground="#99FF99", text="Objednat dle zpoždění", font="Arial_black 8 bold", bg="#409940", command=lambda: callback_cas(listbox, udaje, callback_hlavni_okno, minuty_callback_entry), width=25)
+            minuty_callback_button.grid(row=2, column=0, columnspan=2, pady=5)
+            callback_hlavni_okno.mainloop()
+        except:
+            tkm.showwarning("CHYBA", u"Nezvolil jste příjemce")
+
+
+def callback_cas(listbox, udaje, callback_hlavni_okno, minuty_callback_entry):
+    global kontakty
+    moje_cislo_soubor = open("moje_cislo.txt", "r")
+    moje_cislo = moje_cislo_soubor.readline()
+    moje_cislo_soubor.close()
+    zvoleny_kontakt = map(int, listbox.curselection())
+    volane_cislo = kontakty[zvoleny_kontakt[0]][2]
     minuty = minuty_callback_entry.get()
     cisla = urllib.urlencode({'caller': moje_cislo, 'recipient': volane_cislo, 'delayed': minuty})
     vsechny_udaje = udaje+"&"+cisla
@@ -355,15 +356,13 @@ def callback_cas(cislo_label, udaje, callback_hlavni_okno, minuty_callback_entry
         tkm.showwarning("CHYBA", u"Byl zadán špatný formát spoždění")
 
 
-def callback_datum( cislo_label, udaje, datum_callback_entry, datum_cas_callback_entry, callback_hlavni_okno):
-    try:
-        moje_cislo_soubor = open("moje_cislo.txt", "r")
-        moje_cislo = moje_cislo_soubor.readline()
-        moje_cislo_soubor.close()
-    except:
-        tkm.showwarning("CHYBA", u"Nemáte nastavené vaše číslo")
-        callback_hlavni_okno.destroy()
-    volane_cislo = cislo_label["text"]
+def callback_datum(listbox, udaje, datum_callback_entry, datum_cas_callback_entry, callback_hlavni_okno):
+    global kontakty
+    moje_cislo_soubor = open("moje_cislo.txt", "r")
+    moje_cislo = moje_cislo_soubor.readline()
+    moje_cislo_soubor.close()
+    zvoleny_kontakt = map(int, listbox.curselection())
+    volane_cislo = kontakty[zvoleny_kontakt[0]][2]
     datum = datum_callback_entry.get()+"T"+datum_cas_callback_entry.get()+"+02:00"
     cisla = urllib.urlencode({'caller': moje_cislo, 'recipient': volane_cislo, 'delayed': datum})
     vsechny_udaje = udaje+"&"+cisla
@@ -387,14 +386,16 @@ def callback_datum( cislo_label, udaje, datum_callback_entry, datum_cas_callback
 
 
 
-def objednat_callback(cislo_label,udaje):  ##objedná callback
+def objednat_callback(listbox,udaje):  ##objedná callback
+    global kontakty
     try:
         moje_cislo_soubor = open("moje_cislo.txt", "r")        
         moje_cislo = moje_cislo_soubor.readline()
         moje_cislo_soubor.close()
     except:
         tkm.showwarning("CHYBA",u"Nemáte nastavené vaše číslo")
-    volane_cislo = cislo_label["text"]
+    zvoleny_kontakt = map(int, listbox.curselection())
+    volane_cislo = kontakty[zvoleny_kontakt[0]][2]
     cisla = urllib.urlencode({'caller': moje_cislo, 'recipient': volane_cislo})
     vsechny_udaje = udaje+"&"+cisla
     objednat_callback = urllib.urlopen("https://www.odorik.cz/api/v1/callback", vsechny_udaje)
