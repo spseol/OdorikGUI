@@ -19,10 +19,7 @@ def erory(odpoved):
     return odpoved["errors"]
 
 
-def uspech(odpoved):
-    return odpoved["name"]
-
-def vypsat(kontakty):                   ##získá kontakty ve formátu json
+def vypsat(kontakty):                   # získá kontakty ve formátu json
      return kontakty["shortcut"], kontakty["name"], kontakty["number"]
 
 
@@ -54,7 +51,7 @@ def aktualizovat_kredit(udaje, kontakty_okno, kredit_label):
     else:
         kredit = kredit_mezikrok.read()         # kredit jako řetězec 
         if kredit != "error authentication_failed":     # špatně zadané údaje
-           kredit_label["text"] = kredit+" Kč"
+           kredit_label["text"] = "Váš kredit je:"+kredit+" Kč"
     kontakty_okno.after(10000, lambda: aktualizovat_kredit(udaje, kontakty_okno, kredit_label))
 
 
@@ -103,6 +100,120 @@ def aktualizovat_posledni_hovory(prihl_jmeno, heslo, posl_hov_datum1, posl_hov_c
         except:
             pass
     kontakty_okno.after(10000, lambda: aktualizovat_posledni_hovory(prihl_jmeno, heslo, posl_hov_datum1, posl_hov_cislo1, posl_hov_cena1, pred_posl_hov_datum1, pred_posl_hov_cislo1, pred_posl_hov_cena1, pred_pred_posl_hov_datum1, pred_pred_posl_hov_cislo1, pred_pred_posl_hov_cena1, kontakty_okno))
+
+
+def aktualizovat_kontakty(udaje, listbox, kontakty_okno, zkratky_jmena_cisla):
+    try:
+        kontakty_mezikrok = urllib.urlopen("https://www.odorik.cz/api/v1/speed_dials.json?"+udaje)
+    except:
+        pass
+    else:
+        kontakty_dalsi_mezikrok = kontakty_mezikrok.read()
+        kontakty = json.loads(kontakty_dalsi_mezikrok, object_hook=vypsat)          # kontakty jako 3-členné ntice v seznamu
+        zkratky_jmena_cisla2 = []
+        for i in kontakty:
+            if len(str(i[0])) == 1:
+                zapsat = "  %s    %s" % (i[0], i[1])
+            elif len(str(i[0])) == 2:
+                zapsat = "  %s   %s" % (i[0], i[1])
+            else:
+                zapsat = "  %s  %s" % (i[0], i[1])
+            if len(zapsat) > 58:
+                zapsat = zapsat[:55]+"...  "
+            for y in range(60-len(zapsat)):
+                zapsat = zapsat+" "
+            citac_hvezdicka = -1
+            pozicovac_hvezdicka = 0
+            pozicovac_dvojtecka = 0
+            citac_dvojtecka = -1
+            for pismeno in str(i[2]):
+                if pismeno == ":":
+                    pozicovac_dvojtecka = 1
+                elif pismeno == "*":
+                    pozicovac_hvezdicka = 1
+                if pozicovac_hvezdicka == 1:
+                    citac_hvezdicka = citac_hvezdicka + 1
+                if pozicovac_dvojtecka == 1:
+                    citac_dvojtecka = citac_dvojtecka+1
+            if citac_dvojtecka > 0:
+                upravene_cislo = i[2][(citac_dvojtecka*-1):]
+            elif citac_hvezdicka > 0:
+                upr_cis = i[2][(len(i)-citac_hvezdicka):]
+                if len(upr_cis) == 9:
+                    upravene_cislo = "    %s %s %s" % (upr_cis[-9:-6], upr_cis[-6:-3], upr_cis[:-3])
+                else:
+                    upravene_cislo = "%s %s %s %s" % (i[2][-12:-9], i[2][-9:-6], i[2][-6:-3], i[2][-3:])
+            else:
+                if len(i[2]) == 9:
+                    upravene_cislo = "    %s %s %s" % (i[2][-9:-6], i[2][-6:-3], i[2][-3:])
+                else:
+                    upravene_cislo = "%s %s %s %s" % (i[2][-12:-9], i[2][-9:-6], i[2][-6:-3], i[2][-3:])
+            if len(str(upravene_cislo)) > 20:
+                zapsat = zapsat+upravene_cislo[:20]+"..."
+            else:
+                zapsat = zapsat+str(upravene_cislo)
+            zkratky_jmena_cisla2.append(zapsat)
+        if zkratky_jmena_cisla != zkratky_jmena_cisla2:
+            listbox.delete(0, tk.END)
+            for i in zkratky_jmena_cisla:
+                listbox.insert(tk.END, i)
+    kontakty_okno.after(10000, lambda:aktualizovat_kontakty(udaje, listbox, kontakty_okno))
+
+
+def aktualizovat_kontakty_bez_opakovani(udaje, listbox):
+    try:
+        kontakty_mezikrok = urllib.urlopen("https://www.odorik.cz/api/v1/speed_dials.json?"+udaje)
+    except:
+        pass
+    else:
+        kontakty_dalsi_mezikrok = kontakty_mezikrok.read()
+        kontakty = json.loads(kontakty_dalsi_mezikrok, object_hook=vypsat)          # kontakty jako 3-členné ntice v seznamu
+        zkratky_jmena_cisla = []
+        for i in kontakty:
+            if len(str(i[0])) == 1:
+                zapsat = "  %s    %s" % (i[0], i[1])
+            elif len(str(i[0])) == 2:
+                zapsat = "  %s   %s" % (i[0], i[1])
+            else:
+                zapsat = "  %s  %s" % (i[0], i[1])
+            if len(zapsat) > 58:
+                zapsat = zapsat[:55]+"...  "
+            for y in range(60-len(zapsat)):
+                zapsat = zapsat+" "
+            citac_hvezdicka = -1
+            pozicovac_hvezdicka = 0
+            pozicovac_dvojtecka = 0
+            citac_dvojtecka = -1
+            for pismeno in str(i[2]):
+                if pismeno == ":":
+                    pozicovac_dvojtecka = 1
+                elif pismeno == "*":
+                    pozicovac_hvezdicka = 1
+                if pozicovac_hvezdicka == 1:
+                    citac_hvezdicka = citac_hvezdicka + 1
+                if pozicovac_dvojtecka == 1:
+                    citac_dvojtecka = citac_dvojtecka+1
+            if citac_dvojtecka > 0:
+                upravene_cislo = i[2][(citac_dvojtecka*-1):]
+            elif citac_hvezdicka > 0:
+                upr_cis = i[2][(len(i)-citac_hvezdicka):]
+                if len(upr_cis) == 9:
+                    upravene_cislo = "    %s %s %s" % (upr_cis[-9:-6], upr_cis[-6:-3], upr_cis[:-3])
+                else:
+                    upravene_cislo = "%s %s %s %s" % (i[2][-12:-9], i[2][-9:-6], i[2][-6:-3], i[2][-3:])
+            else:
+                if len(i[2]) == 9:
+                    upravene_cislo = "    %s %s %s" % (i[2][-9:-6], i[2][-6:-3], i[2][-3:])
+                else:
+                    upravene_cislo = "%s %s %s %s" % (i[2][-12:-9], i[2][-9:-6], i[2][-6:-3], i[2][-3:])
+            if len(str(upravene_cislo)) > 20:
+                zapsat = zapsat+upravene_cislo[:20]+"..."
+            else:
+                zapsat = zapsat+str(upravene_cislo)
+            zkratky_jmena_cisla.append(zapsat)
+        listbox.delete(0, tk.END)
+        for i in zkratky_jmena_cisla:
+            listbox.insert(tk.END, i)
 
 
 def prihlasit():
@@ -195,7 +306,7 @@ def prihlasit():
             info_frame = tk.Frame(prihl_okno, bg="#32CD32")
             kredit_label = tk.Label(info_frame, text="Váš kredit je: "+kredit+" Kč", bg="#32CD32", font="Arial_black 10 bold")   ##vypisuje kredit
             kredit_label.grid(sticky=tk.W, column=0, row=0)
-            aktualizovat_kredit(udaje, kontakty_okno, kredit_label)
+            kontakty_okno.after(10000, lambda: aktualizovat_kredit(udaje, kontakty_okno, kredit_label))
             moje_cislo_label = tk.Label(info_frame, text=moje_ulozene_cislo, bg="#32CD32", font="Arial_black 8 bold")
             moje_cislo_label.grid(column=1,row=0, sticky=tk.E,columnspan=2)
             moje_cislo_ulozit_button = tk.Button(info_frame, text="Nastavit čislo pro callback", activebackground="#99FF99", command=lambda: nastavit_moje_cislo(moje_cislo_label), bg="#409940", font="Arial_black 8 bold")
@@ -257,7 +368,7 @@ def prihlasit():
                 pred_pred_posl_hov_cena1["text"] = pred_pred_posl_hovor_cena
             except:
                 pass
-            aktualizovat_posledni_hovory(prihl_jmeno, heslo, posl_hov_datum1, posl_hov_cislo1, posl_hov_cena1, pred_posl_hov_datum1, pred_posl_hov_cislo1, pred_posl_hov_cena1, pred_pred_posl_hov_datum1, pred_pred_posl_hov_cislo1, pred_pred_posl_hov_cena1, kontakty_okno)
+            kontakty_okno.after(10000, lambda: aktualizovat_posledni_hovory(prihl_jmeno, heslo, posl_hov_datum1, posl_hov_cislo1, posl_hov_cena1, pred_posl_hov_datum1, pred_posl_hov_cislo1, pred_posl_hov_cena1, pred_pred_posl_hov_datum1, pred_pred_posl_hov_cislo1, pred_pred_posl_hov_cena1, kontakty_okno))
     # ##########################################################################
             kontakty_frame = tk.LabelFrame(prihl_okno, text="Kontakty", bg="#32CD32", font="Arial_black 8 bold")
             callback_podframe = tk.Frame(kontakty_frame, bg="#32CD32")
@@ -275,11 +386,12 @@ def prihlasit():
             for i in zkratky_jmena_cisla:
                 listbox.insert(tk.END, i)
             scrollbar.grid(row=0, column=1, sticky=tk.S+tk.N)
+            kontakty_okno.after(10000, lambda:aktualizovat_kontakty(udaje, listbox, kontakty_okno, zkratky_jmena_cisla))
             kontakty_frame.grid(row=3, columnspan=3, padx=10, pady=10, sticky=tk.E+tk.W+tk.N+tk.S)
             kontakty_buttony_frame = tk.Frame(kontakty_frame, bg="#32CD32")
-            pridat_button = tk.Button(kontakty_buttony_frame, text="Přidat kontakt", font="Arial_black 8 bold", activebackground="#99FF99", bg="#409940", command=lambda: pridat_kontakt(udaje))
+            pridat_button = tk.Button(kontakty_buttony_frame, text="Přidat kontakt", font="Arial_black 8 bold", activebackground="#99FF99", bg="#409940", command=lambda: pridat_kontakt(udaje, listbox))
             pridat_button.grid(row=0, column=0, padx=20, pady=10)
-            odebrat_button = tk.Button(kontakty_buttony_frame, text="Odebrat kontakt", command=lambda: odebrat(listbox), font="Arial_black 8 bold", activebackground="#99FF99", bg="#409940")
+            odebrat_button = tk.Button(kontakty_buttony_frame, text="Odebrat kontakt", command=lambda: odebrat(listbox, udaje, kontakty), font="Arial_black 8 bold", activebackground="#99FF99", bg="#409940")
             odebrat_button.grid(row=0, column=2, pady=10, padx=20)
             upravit_button = tk.Button(kontakty_buttony_frame, text="Upravit kontakt", font="Arial_black 8 bold", activebackground="#99FF99", bg="#409940", command=lambda: upravit_kontakt(listbox, udaje, kontakty))
             upravit_button.grid(row=0, column=1, pady=10, padx=20)
@@ -309,7 +421,7 @@ def upravit_kontakt(listbox, udaje, kontakty):
         jmeno_entry = tk.Entry(upravit_kontakt_frame, bg="#99FF99")
         jmeno_entry.grid(row=2, column=1)
         jmeno_entry.insert(tk.END, kontakt[1])
-        upravit_kontakt_button = tk.Button(upravit_kontakt_frame, text="Upravit kontakt", activebackground="#99FF99", bg="#409940", font="Arial_black 8 bold", command=lambda: upravit(kontakt, zkratka_entry, cislo_entry, jmeno_entry, udaje, upravit_kontakt_okno))
+        upravit_kontakt_button = tk.Button(upravit_kontakt_frame, text="Upravit kontakt", activebackground="#99FF99", bg="#409940", font="Arial_black 8 bold", command=lambda: upravit(kontakt, zkratka_entry, cislo_entry, jmeno_entry, udaje, upravit_kontakt_okno, listbox))
         upravit_kontakt_button.grid(row=3, columnspan=3)
         upravit_kontakt_frame.grid(row=0, column=0)
         upravit_kontakt_okno.mainloop()
@@ -317,7 +429,7 @@ def upravit_kontakt(listbox, udaje, kontakty):
         tkm.showwarning("CHYBA", u"Nezvolil jste žádný kontakt")
 
 
-def upravit(kontakt, zkratka_entry, cislo_entry, jmeno_entry, udaje, upravit_kontakt_okno):
+def upravit(kontakt, zkratka_entry, cislo_entry, jmeno_entry, udaje, upravit_kontakt_okno, listbox):
     zkratka = str(kontakt[0])
     nova_zkratka = zkratka_entry.get()
     nove_jmeno = jmeno_entry.get()
@@ -346,12 +458,12 @@ def upravit(kontakt, zkratka_entry, cislo_entry, jmeno_entry, udaje, upravit_kon
                 elif i == "unauthorized":
                     tkm.showerror("CHYBA", u"Požadavek nelze vykonat")
         else:
-            odpoved = json.loads(odpoved_mezikrok, object_hook=uspech)
+            aktualizovat_kontakty_bez_opakovani(udaje, listbox)
             tkm.showinfo(u"Upraveno", u"Kontakt byl úspěšně upraven")
             upravit_kontakt_okno.destroy()
 
 
-def pridat_kontakt(udaje):
+def pridat_kontakt(udaje, listbox):
     pridat_kontakt_okno = tk.Tk()
     pridat_kontakt_frame = tk.Frame(pridat_kontakt_okno, bg="#32CD32")
     pridat_kontakt_label = tk.Label(pridat_kontakt_frame, bg="#32CD32", text=u"Přidat kontakt", font="Arial_black 15 bold")
@@ -368,13 +480,13 @@ def pridat_kontakt(udaje):
     cislo_entry.grid(row=2, column=2)
     jmeno_entry = tk.Entry(pridat_kontakt_frame, bg="#99FF99")
     jmeno_entry.grid(row=2, column=1)
-    pridat_kontakt_button = tk.Button(pridat_kontakt_frame, text="Přidat kontakt", activebackground="#99FF99", bg="#409940", font="Arial_black 8 bold", command=lambda: pridat(zkratka_entry, cislo_entry, jmeno_entry, pridat_kontakt_okno, udaje))
+    pridat_kontakt_button = tk.Button(pridat_kontakt_frame, text="Přidat kontakt", activebackground="#99FF99", bg="#409940", font="Arial_black 8 bold", command=lambda: pridat(zkratka_entry, cislo_entry, jmeno_entry, pridat_kontakt_okno, udaje, listbox))
     pridat_kontakt_button.grid(row=3, columnspan=3)
     pridat_kontakt_frame.grid(row=0, column=0)
     pridat_kontakt_okno.mainloop()
 
 
-def pridat(zkratka_entry, cislo_entry, jmeno_entry, pridat_kontakt_okno, udaje):
+def pridat(zkratka_entry, cislo_entry, jmeno_entry, pridat_kontakt_okno, udaje, listbox):
     zkratka = zkratka_entry.get()
     cislo = cislo_entry.get()
     jmeno = jmeno_entry.get()
@@ -405,14 +517,12 @@ def pridat(zkratka_entry, cislo_entry, jmeno_entry, pridat_kontakt_okno, udaje):
                 elif i== "unauthorized":
                     tkm.showerror("CHYBA", u"Požadavek nelze vykonat")
         else:
-            odpoved = json.loads(odpoved_mezikrok, object_hook=uspech)
+            aktualizovat_kontakty_bez_opakovani(udaje, listbox)
             tkm.showinfo(u"Přidáno", u"Kontakt byl úspěšně přidán")
             pridat_kontakt_okno.destroy()
 
 
-def odebrat(listbox):
-    global udaje
-    global kontakty    
+def odebrat(listbox, udaje, kontakty):
     try:  
         zvoleny_kontakt = map(int, listbox.curselection())
         zkratka = str(kontakty[zvoleny_kontakt[0]][0])
@@ -424,6 +534,7 @@ def odebrat(listbox):
                 tkm.showwarning("CHYBA", u"Nelze se připojit k síti")
             else:
                 if smazat.text == "{}":
+                    aktualizovat_kontakty_bez_opakovani(udaje, listbox)
                     tkm.showinfo(u"Úspěch", "Kontakt byl úspěšně smazán")
                 else:
                     tkm.showwarning("Chyba", "Kontakt se nepovedlo smazat")
