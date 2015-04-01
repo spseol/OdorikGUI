@@ -57,15 +57,43 @@ def prihlasit():
                 zapsat = "  %s   %s" % (i[0], i[1])
             else:
                 zapsat = "  %s  %s" % (i[0], i[1])
-            if len(zapsat) > 60:
+            if len(zapsat) > 58:
                 zapsat = zapsat[:55]+"...  "
             for y in range(60-len(zapsat)):
                 zapsat = zapsat+" "
-            if len(i[2]) > 20:
-                zapsat = zapsat+i[2][:23]
+            citac_hvezdicka = -1
+            pozicovac_hvezdicka = 0
+            pozicovac_dvojtecka = 0
+            citac_dvojtecka = -1
+            
+            for pismeno in str(i[2]):
+                if pismeno == ":":
+                    pozicovac_dvojtecka = 1
+                elif pismeno == "*":
+                    pozicovac_hvezdicka = 1
+                if pozicovac_hvezdicka == 1:
+                    citac_hvezdicka = citac_hvezdicka + 1
+                if pozicovac_dvojtecka == 1:
+                    citac_dvojtecka = citac_dvojtecka+1 
+            if citac_dvojtecka > 0:
+                upravene_cislo = i[2][(citac_dvojtecka*-1):]
+            
+            elif citac_hvezdicka > 0:
+                upr_cis = i[2][(len(i)-citac_hvezdicka):]
+                if len(upr_cis) == 9:    
+                    upravene_cislo = "    %s %s %s" % (upr_cis[-9:-6], upr_cis[-6:-3], upr_cis[:-3])
+                else:upravene_cislo = "%s %s %s %s"%(i[2][-12:-9], i[2][-9:-6], i[2][-6:-3], i[2][-3:])
             else:
-                zapsat = zapsat+i[2]
-            zkratky_jmena_cisla.append(zapsat)    
+                if len(i[2]) == 9:
+                    upravene_cislo = "    %s %s %s"%(i[2][-9:-6], i[2][-6:-3], i[2][-3:])
+                else:
+                    upravene_cislo = "%s %s %s %s"%(i[2][-12:-9], i[2][-9:-6], i[2][-6:-3], i[2][-3:])
+            print upravene_cislo
+            if len(str(upravene_cislo)) > 20:
+                zapsat = zapsat+upravene_cislo[:20]+"..."
+            else:
+                zapsat = zapsat+str(upravene_cislo)
+            zkratky_jmena_cisla.append(zapsat)
         dnes = datetime.datetime.now()
         mesic = "%d" % dnes.month
         mesic = int(mesic)
