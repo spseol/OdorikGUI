@@ -49,9 +49,9 @@ def aktualizovat_kredit(udaje, kontakty_okno, kredit_label):
     except:
         pass
     else:
-        kredit = kredit_mezikrok.read()         # kredit jako řetězec 
+        kredit = kredit_mezikrok.read()         # kredit jako řetězec
         if kredit != "error authentication_failed":     # špatně zadané údaje
-           kredit_label["text"] = "Váš kredit je:"+kredit+" Kč"
+           kredit_label["text"] = "Váš kredit je: "+kredit+" Kč"
     kontakty_okno.after(10000, lambda: aktualizovat_kredit(udaje, kontakty_okno, kredit_label))
 
 
@@ -702,15 +702,13 @@ def objednat_callback(listbox,udaje, kontakty):  ##objedná callback
 
 # ############################################################################
 
-
 def ulozit_udaje():             # uloží údaje
     if ulozit_udaje_promenna.get() == 1:
         ul_jmeno = prihl_jmeno_entry.get()
         ul_heslo = heslo_entry.get()
-        # ul_udaje = ul_jmeno+ul_heslo
+        ul_udaje = [ul_jmeno, ul_heslo]
         jmeno_a_heslo = open("jmeno_heslo.txt", "w")
-        jmeno_a_heslo.write(ul_jmeno)
-        jmeno_a_heslo.write(ul_heslo)
+        jmeno_a_heslo.writelines(ul_udaje)
         jmeno_a_heslo.close()
     if ulozit_udaje_promenna.get() == 0:
         jmeno_a_heslo = open("jmeno_heslo.txt", "w")
