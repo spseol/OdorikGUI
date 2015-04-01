@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 """
 Created on Thu Jan 29 21:04:50 2015
-@author: Tom
+@author: Tomáš Grofek
+License: GNU/GPL
 """
 import requests
 import json
@@ -27,6 +28,22 @@ def vypsat(kontakty):                   ##získá kontakty ve formátu json
 
 def datum_cislo_cena(posl_hovor):
     return posl_hovor["date"], posl_hovor["destination_number"], posl_hovor["price"]
+
+
+def datum_hovoru_2hod(datum):
+    datum1 = datetime.datetime(int(datum[:4]), int(datum[5:7]), int(datum[8:10]), int(datum[11:13]), int(datum[14:16]), int(datum[17:19]))
+    dve_hodiny = datetime.timedelta(hours=2)
+    pred_dvema_hodinama = datum1+dve_hodiny
+    pred_dvema_hodinama = "%s.%s.%s  %s" % (str(pred_dvema_hodinama)[8:10], str(pred_dvema_hodinama)[5:7], str(pred_dvema_hodinama)[:4], str(pred_dvema_hodinama)[11:19])
+    return pred_dvema_hodinama
+    
+
+def datum_hovoru_1hod(datum):
+    datum1 = datetime.datetime(int(datum[:4]), int(datum[5:7]), int(datum[8:10]), int(datum[11:13]), int(datum[14:16]), int(datum[17:19]))
+    hodina = datetime.timedelta(hours=1)
+    pred_dvema_hodinama = datum1+hodina
+    pred_dvema_hodinama = "%s.%s.%s  %s" % (str(pred_dvema_hodinama)[8:10], str(pred_dvema_hodinama)[5:7], str(pred_dvema_hodinama)[:4], str(pred_dvema_hodinama)[11:19])
+    return pred_dvema_hodinama
 
 
 def prihlasit():
@@ -65,7 +82,6 @@ def prihlasit():
             pozicovac_hvezdicka = 0
             pozicovac_dvojtecka = 0
             citac_dvojtecka = -1
-            
             for pismeno in str(i[2]):
                 if pismeno == ":":
                     pozicovac_dvojtecka = 1
@@ -88,40 +104,20 @@ def prihlasit():
                     upravene_cislo = "    %s %s %s"%(i[2][-9:-6], i[2][-6:-3], i[2][-3:])
                 else:
                     upravene_cislo = "%s %s %s %s"%(i[2][-12:-9], i[2][-9:-6], i[2][-6:-3], i[2][-3:])
-            print upravene_cislo
             if len(str(upravene_cislo)) > 20:
                 zapsat = zapsat+upravene_cislo[:20]+"..."
             else:
                 zapsat = zapsat+str(upravene_cislo)
             zkratky_jmena_cisla.append(zapsat)
-        dnes = datetime.datetime.now()
-        mesic = "%d" % dnes.month
-        mesic = int(mesic)
-        if mesic == 1:
-            prmesic = 12
-        else:
-            prmesic = mesic-1
-        if prmesic <10:
-            prmesic = "0"+str(prmesic)
-        dnes = str(dnes)
-        do = dnes[:10]+"T"+dnes[11:19]+"Z"
-        od = do[:5]+str(prmesic)+do[7:]
+        dnes = datetime.datetime.today()
+        do = "%sT%sZ" % (str(dnes)[:10], str(dnes)[11:19])
+        ctyri_tydny = datetime.timedelta(weeks=4)
+        pred_ctyrmi_tydny = "%s"%(dnes-ctyri_tydny)
+        od = "%sT%sZ" % (pred_ctyrmi_tydny[:10], pred_ctyrmi_tydny[11:19])
         posl_hovor_url = "https://www.odorik.cz/api/v1/calls.json?"+"user="+prihl_jmeno+"&password="+heslo+"&from="+od+"&to="+do+"&direction=out"
         zjistit_posl_hovor = urllib.urlopen(posl_hovor_url)
         posl_hovor_mezikrok = zjistit_posl_hovor.read()
-        posl_hovor_mezikrok2=json.loads(posl_hovor_mezikrok,object_hook=datum_cislo_cena)
-        posl_hovor = posl_hovor_mezikrok2[len(posl_hovor_mezikrok2)-1]
-        pred_posl_hovor = posl_hovor_mezikrok2[len(posl_hovor_mezikrok2)-2]
-        pred_pred_posl_hovor = posl_hovor_mezikrok2[len(posl_hovor_mezikrok2)-3]
-        posl_hovor_cena = "%.2f"%(posl_hovor_mezikrok2[len(posl_hovor_mezikrok2)-1][2])
-        posl_hovor_datum = "%s.%s.%s   %s"%(posl_hovor[0][8:10], posl_hovor[0][5:7], posl_hovor[0][:4], posl_hovor[0][11:19])
-        posl_hovor_cislo = posl_hovor[1][(len(posl_hovor[1])-9):] 
-        pred_posl_hovor_cena = "%.2f"%(posl_hovor_mezikrok2[len(posl_hovor_mezikrok2)-2][2])
-        pred_posl_hovor_datum = "%s.%s.%s   %s"%(pred_posl_hovor[0][8:10], pred_posl_hovor[0][5:7], pred_posl_hovor[0][:4], pred_posl_hovor[0][11:19])
-        pred_posl_hovor_cislo = pred_posl_hovor[1][(len(pred_posl_hovor[1])-9):]
-        pred_pred_posl_hovor_cena = "%.2f"%(posl_hovor_mezikrok2[len(posl_hovor_mezikrok2)-3][2])
-        pred_pred_posl_hovor_datum = "%s.%s.%s   %s"%(pred_pred_posl_hovor[0][8:10], pred_pred_posl_hovor[0][5:7], pred_pred_posl_hovor[0][:4], pred_pred_posl_hovor[0][11:19])
-        pred_pred_posl_hovor_cislo = pred_pred_posl_hovor[1][(len(posl_hovor[1])-9):]
+        posl_hovor_mezikrok2 = json.loads(posl_hovor_mezikrok, object_hook=datum_cislo_cena)
         try:
             moje_cislo_soubor = open("moje_cislo.txt", "r")
             moje_ulozene_cislo = moje_cislo_soubor.readline()
@@ -148,26 +144,56 @@ def prihlasit():
         posl_hov_cislo.grid(row=2, column=1)
         posl_hov_cena = tk.Label(posledni_hovor_frame, text="Cena", width=21, bg="#32CD32", font="Arial_black 10 bold")
         posl_hov_cena.grid(row=2, column=2)
-        posl_hov_datum1 = tk.Label(posledni_hovor_frame, text=posl_hovor_datum, width=21, bg="#32CD32", font="Arial_black 8 bold")
+        posl_hov_datum1 = tk.Label(posledni_hovor_frame, text="", width=21, bg="#32CD32", font="Arial_black 8 bold")
         posl_hov_datum1.grid(row=3)
-        posl_hov_cislo1 = tk.Label(posledni_hovor_frame, text=posl_hovor_cislo, width=21, bg="#32CD32", font="Arial_black 8 bold")
+        posl_hov_cislo1 = tk.Label(posledni_hovor_frame, text="", width=21, bg="#32CD32", font="Arial_black 8 bold")
         posl_hov_cislo1.grid(row=3, column=1)
-        posl_hov_cena1 = tk.Label(posledni_hovor_frame, text=str(posl_hovor_cena)+" Kč", width=21, bg="#32CD32", font="Arial_black 8 bold")
+        posl_hov_cena1 = tk.Label(posledni_hovor_frame, text="", width=21, bg="#32CD32", font="Arial_black 8 bold")
         posl_hov_cena1.grid(row=3, column=2)
-        pred_posl_hov_datum1 = tk.Label(posledni_hovor_frame, text=pred_posl_hovor_datum, width=21, bg="#32CD32", font="Arial_black 8 bold")
+        pred_posl_hov_datum1 = tk.Label(posledni_hovor_frame, text="", width=21, bg="#32CD32", font="Arial_black 8 bold")
         pred_posl_hov_datum1.grid(row=4)
-        pred_posl_hov_cislo1 = tk.Label(posledni_hovor_frame, text=pred_posl_hovor_cislo, width=21, bg="#32CD32", font="Arial_black 8 bold")
+        pred_posl_hov_cislo1 = tk.Label(posledni_hovor_frame, text="", width=21, bg="#32CD32", font="Arial_black 8 bold")
         pred_posl_hov_cislo1.grid(row=4, column=1)
-        pred_posl_hov_cena1 = tk.Label(posledni_hovor_frame, text=str(pred_posl_hovor_cena)+" Kč", width=21, bg="#32CD32", font="Arial_black 8 bold")
+        pred_posl_hov_cena1 = tk.Label(posledni_hovor_frame, text="", width=21, bg="#32CD32", font="Arial_black 8 bold")
         pred_posl_hov_cena1.grid(row=4, column=2)
-        pred_pred_posl_hov_datum1 = tk.Label(posledni_hovor_frame, text=pred_pred_posl_hovor_datum, width=21, bg="#32CD32", font="Arial_black 8 bold")
+        pred_pred_posl_hov_datum1 = tk.Label(posledni_hovor_frame, text="", width=21, bg="#32CD32", font="Arial_black 8 bold")
         pred_pred_posl_hov_datum1.grid(row=5)
-        pred_pred_posl_hov_cislo1 = tk.Label(posledni_hovor_frame, text=pred_pred_posl_hovor_cislo, width=21, bg="#32CD32", font="Arial_black 8 bold")
+        pred_pred_posl_hov_cislo1 = tk.Label(posledni_hovor_frame, text="", width=21, bg="#32CD32", font="Arial_black 8 bold")
         pred_pred_posl_hov_cislo1.grid(row=5, column=1)
-        pred_posl_hov_cena1 = tk.Label(posledni_hovor_frame, text=str(pred_pred_posl_hovor_cena)+" Kč", width=21, bg="#32CD32", font="Arial_black 8 bold")
-        pred_posl_hov_cena1.grid(row=5, column=2)
+        pred_pred_posl_hov_cena1 = tk.Label(posledni_hovor_frame, text="", width=21, bg="#32CD32", font="Arial_black 8 bold")
+        pred_pred_posl_hov_cena1.grid(row=5, column=2)
         posledni_hovor_frame.grid(pady=1, columnspan=4, sticky=tk.E+tk.W+tk.N+tk.S)
         info_frame.grid(row=1, columnspan=3, padx=10)
+        try:
+            posl_hovor = posl_hovor_mezikrok2[len(posl_hovor_mezikrok2)-1]
+            posl_hovor_cena = "%.2f Kč" % (posl_hovor_mezikrok2[len(posl_hovor_mezikrok2)-1][2])
+            posl_hovor_datum = datum_hovoru_2hod(posl_hovor[0])
+            posl_hovor_cislo = posl_hovor[1][(len(posl_hovor[1])-9):]
+            posl_hov_datum1["text"] = posl_hovor_datum
+            posl_hov_cislo1["text"] = posl_hovor_cislo
+            posl_hov_cena1["text"] = posl_hovor_cena
+        except:
+            pass
+        try:
+            pred_posl_hovor = posl_hovor_mezikrok2[len(posl_hovor_mezikrok2)-2]
+            pred_posl_hovor_cena = "%.2f Kč" % (posl_hovor_mezikrok2[len(posl_hovor_mezikrok2)-2][2])
+            pred_posl_hovor_datum = datum_hovoru_2hod(pred_posl_hovor[0])
+            pred_posl_hovor_cislo = pred_posl_hovor[1][(len(pred_posl_hovor[1])-9):]
+            pred_posl_hov_datum1["text"] = pred_posl_hovor_datum
+            pred_posl_hov_cislo1["text"] = pred_posl_hovor_cislo
+            pred_posl_hov_cena1["text"] = pred_posl_hovor_cena
+        except:
+            pass
+        try:
+            pred_pred_posl_hovor = posl_hovor_mezikrok2[len(posl_hovor_mezikrok2)-3]
+            pred_pred_posl_hovor_cena = "%.2f Kč" % (posl_hovor_mezikrok2[len(posl_hovor_mezikrok2)-3][2])
+            pred_pred_posl_hovor_datum = datum_hovoru_2hod(pred_pred_posl_hovor[0])
+            pred_pred_posl_hovor_cislo = pred_pred_posl_hovor[1][(len(posl_hovor[1])-9):]
+            pred_pred_posl_hov_datum1["text"] = pred_pred_posl_hovor_datum
+            pred_pred_posl_hov_cislo1["text"] = pred_pred_posl_hovor_cislo
+            pred_pred_posl_hov_cena1["text"] = pred_pred_posl_hovor_cena
+        except:
+            pass
 # ##########################################################################
         kontakty_frame = tk.LabelFrame(prihl_okno, text="Kontakty", bg="#32CD32", font="Arial_black 8 bold")
         callback_podframe = tk.Frame(kontakty_frame, bg="#32CD32")
@@ -326,7 +352,9 @@ def odebrat(listbox):
         if tkm.askokcancel("Smazat", "Jste si jisti?"):
             smazat = requests.delete(url='https://www.odorik.cz/api/v1/speed_dials/'+zkratka+'.json', params=udaje)
             if smazat.text == "{}":
-                tkm.showinfo(u"Úspěch", "kontakt byl úspěšně smazán")
+                tkm.showinfo(u"Úspěch", "Kontakt byl úspěšně smazán")
+            else:
+                tkm.showwarning("Chyba", "Kontakt se nepovedlo smazat")
         
     except:
         tkm.showwarning("CHYBA", u"Nezvolil jste žádný kontakt")
