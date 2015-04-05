@@ -706,9 +706,10 @@ def ulozit_udaje():             # uloží údaje
     if ulozit_udaje_promenna.get() == 1:
         ul_jmeno = prihl_jmeno_entry.get()
         ul_heslo = heslo_entry.get()
-        ul_udaje = [ul_jmeno, ul_heslo]
         jmeno_a_heslo = open("jmeno_heslo.txt", "w")
-        jmeno_a_heslo.writelines(ul_udaje)
+        ul_udaje = ul_jmeno+'\n'+ul_heslo
+        print ul_udaje
+        jmeno_a_heslo.write(ul_udaje)
         jmeno_a_heslo.close()
     if ulozit_udaje_promenna.get() == 0:
         jmeno_a_heslo = open("jmeno_heslo.txt", "w")
