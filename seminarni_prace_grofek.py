@@ -157,7 +157,7 @@ def aktualizovat_kontakty(udaje, listbox, kontakty_okno, zkratky_jmena_cisla):
             listbox.delete(0, tk.END)
             for i in zkratky_jmena_cisla:
                 listbox.insert(tk.END, i)
-    kontakty_okno.after(10000, lambda:aktualizovat_kontakty(udaje, listbox, kontakty_okno))
+    kontakty_okno.after(10000, lambda:aktualizovat_kontakty(udaje, listbox, kontakty_okno, zkratky_jmena_cisla))
 
 
 def aktualizovat_kontakty_bez_opakovani(udaje, listbox):
@@ -756,7 +756,7 @@ prihlaseni_button.grid(row=5, pady=10, sticky=tk.NSEW)
 
 try:
     jmeno_a_heslo = open("jmeno_heslo.txt", "r")
-    citac = 0        
+    citac = 0
     for i in jmeno_a_heslo.readlines():
         citac = citac+1
         if citac == 1:
