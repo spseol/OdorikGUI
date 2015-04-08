@@ -20,15 +20,18 @@ def erory(odpoved):
 
 
 def vypsat(kontakty):                   # získá kontakty ve formátu json
-     return kontakty["shortcut"], kontakty["name"], kontakty["number"]
+    return kontakty["shortcut"], kontakty["name"], kontakty["number"]
 
 
 def datum_cislo_cena(posl_hovor):
-    return posl_hovor["date"], posl_hovor["destination_number"], posl_hovor["price"]
+    return (posl_hovor["date"], posl_hovor["destination_number"],
+            posl_hovor["price"])
 
 
 def datum_hovoru_2hod(datum):               # Při letním čase, stačí přejmenovat funkci(2hod na 1hod a v druhé funkci naopak)
-    datum1 = datetime.datetime(int(datum[:4]), int(datum[5:7]), int(datum[8:10]), int(datum[11:13]), int(datum[14:16]), int(datum[17:19]))
+    datum1 = datetime.datetime(int(datum[:4]), int(datum[5:7]),
+                               int(datum[8:10]), int(datum[11:13]),
+                               int(datum[14:16]), int(datum[17:19]))
     dve_hodiny = datetime.timedelta(hours=2)
     pred_dvema_hodinama = datum1+dve_hodiny
     pred_dvema_hodinama = "%s.%s.%s  %s" % (str(pred_dvema_hodinama)[8:10], str(pred_dvema_hodinama)[5:7], str(pred_dvema_hodinama)[:4], str(pred_dvema_hodinama)[11:19])
@@ -704,8 +707,8 @@ def objednat_callback(listbox,udaje, kontakty):  ##objedná callback
 
 def ulozit_udaje():             # uloží údaje
     if ulozit_udaje_promenna.get() == 1:
-        ul_jmeno = prihl_jmeno_entry.get()
-        ul_heslo = heslo_entry.get()
+        ul_jmeno = prihl_jmeno_entry.get().strip()
+        ul_heslo = heslo_entry.get().strip()
         jmeno_a_heslo = open("jmeno_heslo.txt", "w")
         ul_udaje = ul_jmeno+'\n'+ul_heslo
         print ul_udaje
@@ -713,7 +716,6 @@ def ulozit_udaje():             # uloží údaje
         jmeno_a_heslo.close()
     if ulozit_udaje_promenna.get() == 0:
         jmeno_a_heslo = open("jmeno_heslo.txt", "w")
-        jmeno_a_heslo.writelines("")
         jmeno_a_heslo.close()
 
 
@@ -755,10 +757,11 @@ prihlaseni_button.grid(row=5, pady=10, sticky=tk.NSEW)
 
 
 try:
+<<<<<<< HEAD
     jmeno_a_heslo = open("jmeno_heslo.txt", "r")
     citac = 0
     for i in jmeno_a_heslo.readlines():
-        citac = citac+1
+
         if citac == 1:
             if i != "":
                ulozit_udaje_promenna.set(1) 
@@ -767,6 +770,14 @@ try:
             heslo_entry.insert(tk.END, i)
     jmeno_a_heslo.close()
 
+=======
+    flogin = open("jmeno_heslo.txt", "r")
+    radky = flogin.readlines()
+    flogin.close()
+    prihl_jmeno_entry.insert(tk.END, radky[0].strip())
+    ulozit_udaje_promenna.set(1)
+    heslo_entry.insert(tk.END, radky[1].strip())
+>>>>>>> 69553f5fd66446004944b727871b57cc9ba68221
 except:
     pass
 
