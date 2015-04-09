@@ -757,27 +757,12 @@ prihlaseni_button.grid(row=5, pady=10, sticky=tk.NSEW)
 
 
 try:
-<<<<<<< HEAD
-    jmeno_a_heslo = open("jmeno_heslo.txt", "r")
-    citac = 0
-    for i in jmeno_a_heslo.readlines():
-
-        if citac == 1:
-            if i != "":
-               ulozit_udaje_promenna.set(1) 
-            prihl_jmeno_entry.insert(tk.END, i)
-        elif citac == 2:
-            heslo_entry.insert(tk.END, i)
-    jmeno_a_heslo.close()
-
-=======
     flogin = open("jmeno_heslo.txt", "r")
     radky = flogin.readlines()
     flogin.close()
     prihl_jmeno_entry.insert(tk.END, radky[0].strip())
     ulozit_udaje_promenna.set(1)
     heslo_entry.insert(tk.END, radky[1].strip())
->>>>>>> 69553f5fd66446004944b727871b57cc9ba68221
 except:
     pass
 
