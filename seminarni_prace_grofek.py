@@ -383,7 +383,7 @@ def prihlasit():
             listbox_frame = tk.Frame(kontakty_frame, bg="#32CD32")
             listbox_frame.grid(row=1, column=0, padx=7)
             scrollbar = tk.Scrollbar(listbox_frame, orient=tk.VERTICAL)
-            listbox = tk.Listbox(listbox_frame, yscrollcommand=scrollbar.set, width=85, bg="#99FF99", font="Consolas 8 bold", bd=0)
+            listbox = tk.Listbox(listbox_frame, yscrollcommand=scrollbar.set, width=85, bg="#99FF99", font="Courier 8 bold", bd=0)
             scrollbar.config(command=listbox.yview)
             listbox.grid(row=0, column=0)
             for i in zkratky_jmena_cisla:
