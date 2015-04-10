@@ -94,7 +94,7 @@ def aktualizovat_posledni_hovory(prihl_jmeno, heslo, posl_hov_datum1,
             posl_hovor = posl_hovor_mezikrok2[len(posl_hovor_mezikrok2)-1]
             posl_hovor_cena = "%.2f Kč" % (posl_hovor_mezikrok2[len(posl_hovor_mezikrok2)-1][2])
             posl_hovor_datum = datum_hovoru_2hod(posl_hovor[0])
-            posl_hovor_cislo = posl_hovor[1][(len(posl_hovor[1])-9):]
+            posl_hovor_cislo = orezat_cislo(posl_hovor[1])
             posl_hov_datum1["text"] = posl_hovor_datum
             posl_hov_cislo1["text"] = posl_hovor_cislo
             posl_hov_cena1["text"] = posl_hovor_cena
@@ -104,7 +104,7 @@ def aktualizovat_posledni_hovory(prihl_jmeno, heslo, posl_hov_datum1,
             pred_posl_hovor = posl_hovor_mezikrok2[len(posl_hovor_mezikrok2)-2]
             pred_posl_hovor_cena = "%.2f Kč" % (posl_hovor_mezikrok2[len(posl_hovor_mezikrok2)-2][2])
             pred_posl_hovor_datum = datum_hovoru_2hod(pred_posl_hovor[0])
-            pred_posl_hovor_cislo = pred_posl_hovor[1][(len(pred_posl_hovor[1])-9):]
+            pred_posl_hovor_cislo = orezat_cislo(pred_posl_hovor[1])
             pred_posl_hov_datum1["text"] = pred_posl_hovor_datum
             pred_posl_hov_cislo1["text"] = pred_posl_hovor_cislo
             pred_posl_hov_cena1["text"] = pred_posl_hovor_cena
@@ -114,7 +114,7 @@ def aktualizovat_posledni_hovory(prihl_jmeno, heslo, posl_hov_datum1,
             pred_pred_posl_hovor = posl_hovor_mezikrok2[len(posl_hovor_mezikrok2)-3]
             pred_pred_posl_hovor_cena = "%.2f Kč" % (posl_hovor_mezikrok2[len(posl_hovor_mezikrok2)-3][2])
             pred_pred_posl_hovor_datum = datum_hovoru_2hod(pred_pred_posl_hovor[0])
-            pred_pred_posl_hovor_cislo = pred_pred_posl_hovor[1][(len(posl_hovor[1])-9):]
+            pred_pred_posl_hovor_cislo = orezat_cislo(pred_pred_posl_hovor[1])
             pred_pred_posl_hov_datum1["text"] = pred_pred_posl_hovor_datum
             pred_pred_posl_hov_cislo1["text"] = pred_pred_posl_hovor_cislo
             pred_pred_posl_hov_cena1["text"] = pred_pred_posl_hovor_cena
@@ -135,8 +135,8 @@ def aktualizovat_posledni_hovory(prihl_jmeno, heslo, posl_hov_datum1,
                                                              kontakty_okno))
 
 
-def aktualizovat_kontakty(udaje, listbox, kontakty_okno, zkratky_jmena_cisla,
-                          kontakty):
+def aktualizovat_kontakty(udaje, listbox, kontakty_okno, zkratky_jmena_cisla):
+    global kontakty
     try:
         kontakty_mezikrok2 = urllib.urlopen("https://www.odorik.cz/api/v1/speed_dials.json?"+udaje)
     except:
@@ -153,9 +153,9 @@ def aktualizovat_kontakty(udaje, listbox, kontakty_okno, zkratky_jmena_cisla,
                 zapsat = "  %s   %s" % (i[0], i[1])
             else:
                 zapsat = "  %s  %s" % (i[0], i[1])
-            if len(zapsat) > 58:
-                zapsat = zapsat[:55]+"...  "
-            for y in range(60-len(zapsat)):
+            if len(zapsat) > 38:
+                zapsat = zapsat[:35]+"...  "
+            for y in range(40-len(zapsat)):
                 zapsat = zapsat+" "
             citac_hvezdicka = -1
             pozicovac_hvezdicka = 0
@@ -202,15 +202,55 @@ def aktualizovat_kontakty(udaje, listbox, kontakty_okno, zkratky_jmena_cisla,
             listbox.delete(0, tk.END)
             for i in zkratky_jmena_cisla2:
                 listbox.insert(tk.END, i)
-    if kontakty2 != kontakty:
         kontakty = kontakty2
     kontakty_okno.after(10000, lambda: aktualizovat_kontakty(udaje, listbox,
                                                              kontakty_okno,
-                                                             zkratky_jmena_cisla,
-                                                             kontakty))
+                                                             zkratky_jmena_cisla))
+
+
+def orezat_cislo(i):
+    citac_hvezdicka = 0
+    citac_dvojtecka = 0
+    pozicovac_dvojtecka = 0
+    pozicovac_hvezdicka = 0
+    for pismeno in str(i):
+        if pismeno == ":":
+            pozicovac_dvojtecka = 1
+        elif pismeno == "*":
+            pozicovac_hvezdicka = 1
+        if pozicovac_hvezdicka == 1:
+            citac_hvezdicka = citac_hvezdicka + 1
+        if pozicovac_dvojtecka == 1:
+            citac_dvojtecka = citac_dvojtecka+1
+        if citac_dvojtecka > 0:
+            upravene_cislo = i[(citac_dvojtecka*-1):]
+        elif citac_hvezdicka > 0:
+            upr_cis = i[(len(i)-citac_hvezdicka):]
+            if len(upr_cis) == 9:
+                upravene_cislo = "    %s %s %s" % (upr_cis[-9:-6],
+                                                   upr_cis[-6:-3],
+                                                   upr_cis[:-3])
+            else: upravene_cislo = "%s %s %s %s" % (i[-12:-9],
+                                                    i[-9:-6],
+                                                    i[-6:-3],
+                                                    i[-3:])
+        else:
+            if len(i[2]) == 9:
+                upravene_cislo = "    %s %s %s" % (i[-9:-6],
+                                                   i[-6:-3],
+                                                   i[-3:])
+            else:
+                upravene_cislo = "%s %s %s %s" % (i[-12:-9],
+                                                  i[-9:-6],
+                                                  i[-6:-3],
+                                                  i[-3:])
+    if len(str(upravene_cislo)) > 40:
+        upravene_cislo = upravene_cislo[:40]+"..."
+    return upravene_cislo
 
 
 def aktualizovat_kontakty_bez_opakovani(udaje, listbox):
+    global kontakty
     try:
         kontakty_mezikrok = urllib.urlopen("https://www.odorik.cz/api/v1/speed_dials.json?"+udaje)
     except:
@@ -226,9 +266,9 @@ def aktualizovat_kontakty_bez_opakovani(udaje, listbox):
                 zapsat = "  %s   %s" % (i[0], i[1])
             else:
                 zapsat = "  %s  %s" % (i[0], i[1])
-            if len(zapsat) > 58:
-                zapsat = zapsat[:55]+"...  "
-            for y in range(60-len(zapsat)):
+            if len(zapsat) > 38:
+                zapsat = zapsat[:35]+"...  "
+            for y in range(40-len(zapsat)):
                 zapsat = zapsat+" "
             citac_hvezdicka = -1
             pozicovac_hvezdicka = 0
@@ -266,8 +306,8 @@ def aktualizovat_kontakty_bez_opakovani(udaje, listbox):
                                                       i[2][-9:-6],
                                                       i[2][-6:-3],
                                                       i[2][-3:])
-            if len(str(upravene_cislo)) > 20:
-                zapsat = zapsat+upravene_cislo[:20]+"..."
+            if len(str(upravene_cislo)) > 40:
+                zapsat = zapsat+upravene_cislo[:40]+"..."
             else:
                 zapsat = zapsat+str(upravene_cislo)
             zkratky_jmena_cisla.append(zapsat)
@@ -304,6 +344,7 @@ def prihlasit():
             tkm.showwarning("CHYBA", u"Zadal/a jste špatné přihlašovací údaje")
         else:                                           ## dobře zadané údaje
             kontakty_dalsi_mezikrok = kontakty_mezikrok.read()
+            global kontakty
             kontakty = json.loads(kontakty_dalsi_mezikrok, object_hook=vypsat)
             zkratky_jmena_cisla = []
             for i in kontakty:
@@ -313,9 +354,9 @@ def prihlasit():
                     zapsat = "  %s   %s" % (i[0], i[1])
                 else:
                     zapsat = "  %s  %s" % (i[0], i[1])
-                if len(zapsat) > 58:
-                    zapsat = zapsat[:55]+"...  "
-                for y in range(60-len(zapsat)):
+                if len(zapsat) > 38:
+                    zapsat = zapsat[:35]+"...  "
+                for y in range(40-len(zapsat)):
                     zapsat = zapsat+" "
                 citac_hvezdicka = -1
                 pozicovac_hvezdicka = 0
@@ -329,20 +370,19 @@ def prihlasit():
                     if pozicovac_hvezdicka == 1:
                         citac_hvezdicka = citac_hvezdicka + 1
                     if pozicovac_dvojtecka == 1:
-                        citac_dvojtecka = citac_dvojtecka+1 
+                        citac_dvojtecka = citac_dvojtecka+1
                 if citac_dvojtecka > 0:
                     upravene_cislo = i[2][(citac_dvojtecka*-1):]
-                
                 elif citac_hvezdicka > 0:
                     upr_cis = i[2][(len(i)-citac_hvezdicka):]
-                    if len(upr_cis) == 9:    
+                    if len(upr_cis) == 9:
                         upravene_cislo = "    %s %s %s" % (upr_cis[-9:-6],
                                                            upr_cis[-6:-3],
                                                            upr_cis[:-3])
-                    else:upravene_cislo = "%s %s %s %s" % (i[2][-12:-9],
-                                                           i[2][-9:-6],
-                                                           i[2][-6:-3],
-                                                           i[2][-3:])
+                    else: upravene_cislo = "%s %s %s %s" % (i[2][-12:-9],
+                                                            i[2][-9:-6],
+                                                            i[2][-6:-3],
+                                                            i[2][-3:])
                 else:
                     if len(i[2]) == 9:
                         upravene_cislo = "    %s %s %s" % (i[2][-9:-6],
@@ -353,8 +393,8 @@ def prihlasit():
                                                           i[2][-9:-6],
                                                           i[2][-6:-3],
                                                           i[2][-3:])
-                if len(str(upravene_cislo)) > 20:
-                    zapsat = zapsat+upravene_cislo[:20]+"..."
+                if len(str(upravene_cislo)) > 40:
+                    zapsat = zapsat+upravene_cislo[:40]+"..."
                 else:
                     zapsat = zapsat+str(upravene_cislo)
                 zkratky_jmena_cisla.append(zapsat)
@@ -447,7 +487,7 @@ def prihlasit():
                 posl_hovor = posl_hovor_mezikrok2[len(posl_hovor_mezikrok2)-1]
                 posl_hovor_cena = "%.2f Kč" % (posl_hovor_mezikrok2[len(posl_hovor_mezikrok2)-1][2])
                 posl_hovor_datum = datum_hovoru_2hod(posl_hovor[0])
-                posl_hovor_cislo = posl_hovor[1][(len(posl_hovor[1])-9):]
+                posl_hovor_cislo = orezat_cislo(posl_hovor[1])
                 posl_hov_datum1["text"] = posl_hovor_datum
                 posl_hov_cislo1["text"] = posl_hovor_cislo
                 posl_hov_cena1["text"] = posl_hovor_cena
@@ -457,7 +497,7 @@ def prihlasit():
                 pred_posl_hovor = posl_hovor_mezikrok2[len(posl_hovor_mezikrok2)-2]
                 pred_posl_hovor_cena = "%.2f Kč" % (posl_hovor_mezikrok2[len(posl_hovor_mezikrok2)-2][2])
                 pred_posl_hovor_datum = datum_hovoru_2hod(pred_posl_hovor[0])
-                pred_posl_hovor_cislo = pred_posl_hovor[1][(len(pred_posl_hovor[1])-9):]
+                pred_posl_hovor_cislo = orezat_cislo(pred_posl_hovor[1])
                 pred_posl_hov_datum1["text"] = pred_posl_hovor_datum
                 pred_posl_hov_cislo1["text"] = pred_posl_hovor_cislo
                 pred_posl_hov_cena1["text"] = pred_posl_hovor_cena
@@ -467,7 +507,7 @@ def prihlasit():
                 pred_pred_posl_hovor = posl_hovor_mezikrok2[len(posl_hovor_mezikrok2)-3]
                 pred_pred_posl_hovor_cena = "%.2f Kč" % (posl_hovor_mezikrok2[len(posl_hovor_mezikrok2)-3][2])
                 pred_pred_posl_hovor_datum = datum_hovoru_2hod(pred_pred_posl_hovor[0])
-                pred_pred_posl_hovor_cislo = pred_pred_posl_hovor[1][(len(posl_hovor[1])-9):]
+                pred_pred_posl_hovor_cislo = orezat_cislo(pred_pred_posl_hovor[1])
                 pred_pred_posl_hov_datum1["text"] = pred_pred_posl_hovor_datum
                 pred_pred_posl_hov_cislo1["text"] = pred_pred_posl_hovor_cislo
                 pred_pred_posl_hov_cena1["text"] = pred_pred_posl_hovor_cena
@@ -526,8 +566,7 @@ def prihlasit():
             kontakty_okno.after(10000,
                                 lambda: aktualizovat_kontakty(udaje, listbox,
                                                               kontakty_okno,
-                                                              zkratky_jmena_cisla,
-                                                              kontakty))
+                                                              zkratky_jmena_cisla))
             kontakty_frame.grid(row=3, columnspan=3, padx=10, pady=10,
                                 sticky=tk.E+tk.W+tk.N+tk.S)
             kontakty_buttony_frame = tk.Frame(kontakty_frame, bg="#32CD32")
