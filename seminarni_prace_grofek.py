@@ -339,10 +339,10 @@ def prihlasit():
     except:
         tkm.showwarning("CHYBA", u"Nelze se připojit k síti")
     else:
-        kredit = kredit_mezikrok.read()         ## kredit jako řetězec   
-        if kredit == "error authentication_failed":     ## špatně zadané údaje
+        kredit = kredit_mezikrok.read()         #  kredit jako řetězec   
+        if kredit == "error authentication_failed":     #  špatně zadané údaje
             tkm.showwarning("CHYBA", u"Zadal/a jste špatné přihlašovací údaje")
-        else:                                           ## dobře zadané údaje
+        else:                                           #  dobře zadané údaje
             kontakty_dalsi_mezikrok = kontakty_mezikrok.read()
             global kontakty
             kontakty = json.loads(kontakty_dalsi_mezikrok, object_hook=vypsat)
@@ -424,7 +424,7 @@ def prihlasit():
             moje_cislo_label = tk.Label(info_frame, text=moje_ulozene_cislo,
                                         bg="#32CD32",
                                         font="Arial_black 8 bold")
-            moje_cislo_label.grid(column=1 ,row=0, sticky=tk.E, columnspan=2)
+            moje_cislo_label.grid(column=1, row=0, sticky=tk.E, columnspan=2)
             moje_cislo_ulozit_button = tk.Button(info_frame,
                                                  text="Nastavit čislo pro callback",
                                                  activebackground="#99FF99",
