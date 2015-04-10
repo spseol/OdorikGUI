@@ -64,7 +64,7 @@ def aktualizovat_kredit(udaje, kontakty_okno, kredit_label):
         kredit = kredit_mezikrok.read()         # kredit jako řetězec
         if kredit != "error authentication_failed":     # špatně zadané údaje
            kredit_label["text"] = "Váš kredit je: "+kredit+" Kč"
-    kontakty_okno.after(10000, lambda: aktualizovat_kredit(udaje,
+    kontakty_okno.after(3000, lambda: aktualizovat_kredit(udaje,
                                                            kontakty_okno,
                                                            kredit_label))
 
@@ -197,13 +197,13 @@ def aktualizovat_kontakty(udaje, listbox, kontakty_okno, zkratky_jmena_cisla):
                 zapsat = zapsat+upravene_cislo[:20]+"..."
             else:
                 zapsat = zapsat+str(upravene_cislo)
-            zkratky_jmena_cisla2.append(zapsat)
+            zkratky_jmena_cisla2.append(zapsat)   
         if zkratky_jmena_cisla != zkratky_jmena_cisla2:
             listbox.delete(0, tk.END)
             for i in zkratky_jmena_cisla2:
                 listbox.insert(tk.END, i)
         kontakty = kontakty2
-    kontakty_okno.after(10000, lambda: aktualizovat_kontakty(udaje, listbox,
+    kontakty_okno.after(30000, lambda: aktualizovat_kontakty(udaje, listbox,
                                                              kontakty_okno,
                                                              zkratky_jmena_cisla))
 
@@ -430,7 +430,7 @@ def prihlasit():
                                                  activebackground="#99FF99",
                                                  command=lambda: nastavit_moje_cislo(moje_cislo_label),
                                                  bg="#409940", font="Arial_black 8 bold")
-            moje_cislo_ulozit_button.grid(column=3, row=0, sticky=tk.E, pady=2)
+            moje_cislo_ulozit_button.grid(column=3, row=0, sticky=tk.E+tk.W, pady=2)
             posledni_hovor_frame = tk.LabelFrame(info_frame,
                                                  text="Poslední hovory",
                                                  bg="#32CD32",
@@ -560,13 +560,9 @@ def prihlasit():
                                  bd=0)
             scrollbar.config(command=listbox.yview)
             listbox.grid(row=0, column=0)
-            for i in zkratky_jmena_cisla:
-                listbox.insert(tk.END, i)
             scrollbar.grid(row=0, column=1, sticky=tk.S+tk.N)
-            kontakty_okno.after(10000,
-                                lambda: aktualizovat_kontakty(udaje, listbox,
-                                                              kontakty_okno,
-                                                              zkratky_jmena_cisla))
+            aktualizovat_kontakty(udaje, listbox, kontakty_okno,
+                                  zkratky_jmena_cisla)
             kontakty_frame.grid(row=3, columnspan=3, padx=10, pady=10,
                                 sticky=tk.E+tk.W+tk.N+tk.S)
             kontakty_buttony_frame = tk.Frame(kontakty_frame, bg="#32CD32")
